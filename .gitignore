@@ -1,0 +1,32 @@
+# ── Anchor / Solana ──────────────────────────────────────
+traz_log/.anchor/
+traz_log/target/
+
+# ── Node / TypeScript (tests y frontend) ─────────────────
+traz_log/node_modules/
+traz_log/app/node_modules/
+traz_log/.pnp
+traz_log/.pnp.js
+
+# ── Credenciales y configuración local ───────────────────
+.env
+.env.local
+traz_log/.env
+traz_log/.env.local
+
+# Keypairs de wallet (nunca al repo)
+*-keypair.json
+deploy-keypair.json
+wallet.json
+
+# ── Directorio de referencia local ───────────────────────
+# Análisis de migración y documentos previos (solo referencia local)
+Reference/
+
+# ── IDEs y sistema operativo ─────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

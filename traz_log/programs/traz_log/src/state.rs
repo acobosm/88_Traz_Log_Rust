@@ -1,0 +1,80 @@
+use anchor_lang::prelude::*;
+
+// ── Account structs ───────────────────────────────────────────────────────────
+
+#[account]
+#[derive(InitSpace)]
+pub struct GlobalState {
+    pub next_incident_id: u64,
+    pub is_paused: bool,
+    pub admin: Pubkey,
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct PersonnelAccount {
+    pub wallet: Pubkey,
+    #[max_len(64)]
+    pub name: String,
+    #[max_len(64)]
+    pub specialty: String,
+    pub is_active: bool,
+    pub role: Role,
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct EquipmentAccount {
+    pub code: [u8; 32],
+    #[max_len(128)]
+    pub description: String,
+    pub nominal_consumption: u64,  // ml/hour
+    pub status: EquipmentStatus,
+    pub reported_condition: ReportedCondition,
+    pub custodian: Pubkey,
+    pub incident_id: u64,
+    pub use_start_time: i64,       // unix timestamp
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct IncidentAccount {
+    pub incident_id: u64,
+    #[max_len(128)]
+    pub coordinates: String,
+    pub risk_level: u8,            // 1–5
+    pub is_active: bool,
+    pub opened_at: i64,            // unix timestamp
+    pub commander: Pubkey,
+    pub bump: u8,
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+pub enum Role {
+    Admin,
+    OperationalBase,
+    SceneCommander,
+    Operator,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+pub enum EquipmentStatus {
+    Available,
+    InUse,
+    InRepair,
+    Lost,
+    Returning,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+pub enum ReportedCondition {
+    Operational,
+    MinorDamage,
+    CriticalDamage,
+    Lost,
+}

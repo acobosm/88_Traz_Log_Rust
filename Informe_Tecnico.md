@@ -7,7 +7,7 @@
 | Campo | Detalle |
 |---|---|
 | **Proyecto** | FireOPS — Sistema de Trazabilidad Logística |
-| **Versión** | 0.1.0 (Fase 0 — Workspace y arquitectura base) |
+| **Versión** | 0.1.0 (Fase 1 — Arquitectura de cuentas verificada) |
 | **Fecha** | 2026-07-04 |
 | **Autor** | Andres C. |
 | **Repositorio** | `04_Rust_Practice/88_Traz_Log` |
@@ -547,9 +547,17 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-**Resumen:** 3 tests pasados, 0 fallidos.
+**Resumen acumulado:** 8 tests pasados, 0 fallidos.
 
-> **Sobre la warning:** El re-export glob genera un warning porque la función `handler` (privada al uso externo) tiene el mismo nombre en todos los módulos. Es inofensiva — las instrucciones se invocan siempre por path completo en `lib.rs` (`register_personnel::handler(ctx, ...)`), eliminando toda ambigüedad en runtime.
+| Suite | Tests | Archivo |
+|---|---|---|
+| Unittests lib | 1 | `src/lib.rs` (generado por Anchor) |
+| Fase 0 — Initialize | 2 | `tests/test_initialize.rs` |
+| Fase 1 — Account Architecture | 5 | `tests/test_toggle_pause.rs` |
+
+> **Sobre la warning:** El re-export glob genera un warning porque la función `handler` tiene el mismo nombre en todos los módulos. Es inofensiva — las instrucciones se invocan siempre por path completo en `lib.rs` (`register_personnel::handler(ctx, ...)`), eliminando toda ambigüedad en runtime.
+
+> **Hallazgo técnico — `expire_blockhash()`:** En LiteSVM 0.10, dos transacciones con idéntico contenido (mismos accounts, misma instrucción, mismo signer) dentro del mismo slot tienen la misma firma y la segunda falla con `AlreadyProcessed`. La solución es llamar `svm.expire_blockhash()` entre envíos para rotar el blockhash interno y generar firmas distintas. Este patrón aplica en cualquier test que envíe la misma instrucción dos veces consecutivas.
 
 ---
 
@@ -588,8 +596,8 @@ La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BA
 
 | Fase | Rama Git | Estado | Contenido principal |
 |---|---|---|---|
-| **0** | `0_anchor_fundamentals` | **En progreso** | Workspace, 9 instrucciones, 3 tests de initialize |
-| 1 | `1_account_architecture` | Pendiente | Tests de cada account struct, verificación de layouts |
+| **0** | `0_anchor_fundamentals` | **Completada** | Workspace, 9 instrucciones, 3 tests de initialize |
+| **1** | `1_account_architecture` | **Completada** | Tamaño de GlobalState, deserialización de campos, 5 tests de toggle_pause |
 | 2 | `2_registration_and_inventory` | Pendiente | Tests completos de `register_personnel` y `register_equipment` |
 | 3 | `3_incident_management` | Pendiente | Tests de `open_fire_incident`, `assign_equipment`, `log_milestone` |
 | 4 | `4_return_and_close` | Pendiente | Tests de `initiate_return`, `close_incident`, flujo E2E completo |

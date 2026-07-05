@@ -7,7 +7,7 @@
 | Campo | Detalle |
 |---|---|
 | **Proyecto** | FireOPS — Sistema de Trazabilidad Logística |
-| **Versión** | 0.1.0 (Fase 1 — Arquitectura de cuentas verificada) |
+| **Versión** | 0.1.0 (Fase 2 — Registro de personal y equipos verificado) |
 | **Fecha** | 2026-07-04 |
 | **Autor** | Andres C. |
 | **Repositorio** | `04_Rust_Practice/88_Traz_Log` |
@@ -524,36 +524,58 @@ warning: ambiguous glob re-exports
    = note: `#[warn(ambiguous_glob_reexports)]` on by default
 
 warning: `traz_log` (lib) generated 1 warning
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.81s
      Running unittests src/lib.rs (target/debug/deps/traz_log-1d609f2171abe445)
-
 running 1 test
 test test_id ... ok
-
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
      Running tests/test_initialize.rs (target/debug/deps/test_initialize-ce196e98174629cd)
-
 running 2 tests
-test test_global_state_not_paused_after_init ... ok
 test test_initialize_creates_global_state ... ok
+test test_global_state_not_paused_after_init ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
 
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+     Running tests/test_register_equipment.rs (target/debug/deps/test_register_equipment-e7835a146f363323)
+running 5 tests
+test test_equipment_account_size_is_231_bytes ... ok
+test test_equipment_account_fields_are_correct ... ok
+test test_operational_base_registers_equipment_successfully ... ok
+test test_duplicate_equipment_code_fails ... ok
+test test_wrong_role_cannot_register_equipment ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/test_register_personnel.rs (target/debug/deps/test_register_personnel-f12cd4618f574c68)
+running 5 tests
+test test_personnel_account_fields_are_correct ... ok
+test test_non_admin_cannot_register_personnel ... ok
+test test_admin_registers_personnel_successfully ... ok
+test test_personnel_account_size_is_179_bytes ... ok
+test test_paused_system_blocks_personnel_registration ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/test_toggle_pause.rs (target/debug/deps/test_toggle_pause-309b01c85c8145f0)
+running 5 tests
+test test_global_state_fields_after_initialize ... ok
+test test_global_state_account_size_is_50_bytes ... ok
+test test_admin_can_pause_system ... ok
+test test_non_admin_cannot_toggle_pause ... ok
+test test_admin_can_unpause_system ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
 
    Doc-tests traz_log
-
 running 0 tests
-
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-**Resumen acumulado:** 8 tests pasados, 0 fallidos.
+**Resumen acumulado:** 18 tests pasados, 0 fallidos.
 
 | Suite | Tests | Archivo |
 |---|---|---|
 | Unittests lib | 1 | `src/lib.rs` (generado por Anchor) |
 | Fase 0 — Initialize | 2 | `tests/test_initialize.rs` |
 | Fase 1 — Account Architecture | 5 | `tests/test_toggle_pause.rs` |
+| Fase 2 — Register Personnel | 5 | `tests/test_register_personnel.rs` |
+| Fase 2 — Register Equipment | 5 | `tests/test_register_equipment.rs` |
 
 > **Sobre la warning:** El re-export glob genera un warning porque la función `handler` tiene el mismo nombre en todos los módulos. Es inofensiva — las instrucciones se invocan siempre por path completo en `lib.rs` (`register_personnel::handler(ctx, ...)`), eliminando toda ambigüedad en runtime.
 
@@ -598,7 +620,7 @@ La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BA
 |---|---|---|---|
 | **0** | `0_anchor_fundamentals` | **Completada** | Workspace, 9 instrucciones, 3 tests de initialize |
 | **1** | `1_account_architecture` | **Completada** | Tamaño de GlobalState, deserialización de campos, 5 tests de toggle_pause |
-| 2 | `2_registration_and_inventory` | Pendiente | Tests completos de `register_personnel` y `register_equipment` |
+| **2** | `2_registration_and_inventory` | **Completada** | 10 tests: campos, tamaños, control de roles y deduplicación de PDAs; añadido `Debug` a los 3 enums |
 | 3 | `3_incident_management` | Pendiente | Tests de `open_fire_incident`, `assign_equipment`, `log_milestone` |
 | 4 | `4_return_and_close` | Pendiente | Tests de `initiate_return`, `close_incident`, flujo E2E completo |
 | 5 | `5_phantom_frontend` | Pendiente | Vue.js + Phantom Wallet adapter |

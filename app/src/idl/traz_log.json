@@ -1,0 +1,1386 @@
+{
+  "address": "13p4xV6WHaPwWzno1F6Z6MeY9b9wLYtEMAnUF8ofdW75",
+  "metadata": {
+    "name": "traz_log",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "assign_equipment",
+      "docs": [
+        "Assigns equipment to an operator within an active incident. SceneCommander only."
+      ],
+      "discriminator": [
+        95,
+        195,
+        97,
+        129,
+        203,
+        176,
+        178,
+        115
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "equipment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  113,
+                  117,
+                  105,
+                  112,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "equipment_code"
+              }
+            ]
+          }
+        },
+        {
+          "name": "incident",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  99,
+                  105,
+                  100,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "incident_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "operator_wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator_wallet"
+        }
+      ],
+      "args": [
+        {
+          "name": "equipment_code",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "incident_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "close_incident",
+      "docs": [
+        "Closes the incident (lazy model). SceneCommander only."
+      ],
+      "discriminator": [
+        120,
+        124,
+        119,
+        29,
+        215,
+        28,
+        153,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "incident",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  99,
+                  105,
+                  100,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "incident_id"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "incident_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "docs": [
+        "Initializes GlobalState PDA. Called once by admin after deploying."
+      ],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initiate_return",
+      "docs": [
+        "Operator initiates equipment return. Equipment moves to Returning status."
+      ],
+      "discriminator": [
+        102,
+        223,
+        118,
+        213,
+        214,
+        99,
+        46,
+        236
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "equipment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  113,
+                  117,
+                  105,
+                  112,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "equipment_code"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "equipment_code",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "log_milestone",
+      "docs": [
+        "Reports equipment condition from the field. Operator (custodian) only."
+      ],
+      "discriminator": [
+        98,
+        62,
+        190,
+        133,
+        213,
+        240,
+        225,
+        247
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "equipment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  113,
+                  117,
+                  105,
+                  112,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "equipment_code"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "equipment_code",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "notes",
+          "type": "string"
+        },
+        {
+          "name": "condition",
+          "type": {
+            "defined": {
+              "name": "ReportedCondition"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "open_fire_incident",
+      "docs": [
+        "Opens a new fire incident. SceneCommander only.",
+        "incident_id must equal global_state.next_incident_id."
+      ],
+      "discriminator": [
+        236,
+        66,
+        70,
+        191,
+        149,
+        247,
+        236,
+        209
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "incident",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  99,
+                  105,
+                  100,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "incident_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "incident_id",
+          "type": "u64"
+        },
+        {
+          "name": "coordinates",
+          "type": "string"
+        },
+        {
+          "name": "risk_level",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "register_equipment",
+      "docs": [
+        "Registers equipment in inventory. OperationalBase only."
+      ],
+      "discriminator": [
+        25,
+        237,
+        11,
+        242,
+        149,
+        44,
+        164,
+        228
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "signer_personnel",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "equipment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  113,
+                  117,
+                  105,
+                  112,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "code"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "code",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "nominal_consumption",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "register_personnel",
+      "docs": [
+        "Registers a brigade member with an assigned role. Admin only (Phase 0)."
+      ],
+      "discriminator": [
+        144,
+        93,
+        252,
+        153,
+        72,
+        27,
+        1,
+        154
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "new_personnel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "wallet",
+          "docs": [
+            "The wallet address being registered as personnel"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "specialty",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": {
+            "defined": {
+              "name": "Role"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "toggle_pause",
+      "docs": [
+        "Pauses or unpauses the system. Admin only."
+      ],
+      "discriminator": [
+        238,
+        237,
+        206,
+        27,
+        255,
+        95,
+        123,
+        229
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "EquipmentAccount",
+      "discriminator": [
+        48,
+        131,
+        100,
+        103,
+        183,
+        154,
+        86,
+        239
+      ]
+    },
+    {
+      "name": "GlobalState",
+      "discriminator": [
+        163,
+        46,
+        74,
+        168,
+        216,
+        123,
+        133,
+        98
+      ]
+    },
+    {
+      "name": "IncidentAccount",
+      "discriminator": [
+        70,
+        243,
+        134,
+        204,
+        26,
+        179,
+        167,
+        121
+      ]
+    },
+    {
+      "name": "PersonnelAccount",
+      "discriminator": [
+        115,
+        210,
+        28,
+        204,
+        236,
+        138,
+        79,
+        87
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "EquipmentAssigned",
+      "discriminator": [
+        120,
+        150,
+        13,
+        150,
+        135,
+        195,
+        14,
+        47
+      ]
+    },
+    {
+      "name": "EquipmentRegistered",
+      "discriminator": [
+        86,
+        206,
+        2,
+        116,
+        135,
+        8,
+        64,
+        150
+      ]
+    },
+    {
+      "name": "IncidentClosed",
+      "discriminator": [
+        22,
+        157,
+        204,
+        159,
+        155,
+        46,
+        23,
+        244
+      ]
+    },
+    {
+      "name": "IncidentOpened",
+      "discriminator": [
+        239,
+        42,
+        225,
+        83,
+        172,
+        22,
+        9,
+        71
+      ]
+    },
+    {
+      "name": "PersonnelRegistered",
+      "discriminator": [
+        143,
+        144,
+        113,
+        222,
+        184,
+        244,
+        186,
+        71
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized: insufficient role for this action"
+    },
+    {
+      "code": 6001,
+      "name": "SystemPaused",
+      "msg": "System is currently paused"
+    },
+    {
+      "code": 6002,
+      "name": "InactivePersonnel",
+      "msg": "Personnel account is inactive"
+    },
+    {
+      "code": 6003,
+      "name": "EquipmentNotAvailable",
+      "msg": "Equipment is not available for assignment"
+    },
+    {
+      "code": 6004,
+      "name": "EquipmentNotInUse",
+      "msg": "Equipment is not in use"
+    },
+    {
+      "code": 6005,
+      "name": "NotCustodian",
+      "msg": "Caller is not the equipment custodian"
+    },
+    {
+      "code": 6006,
+      "name": "IncidentNotActive",
+      "msg": "Incident is not active"
+    },
+    {
+      "code": 6007,
+      "name": "IncidentAlreadyClosed",
+      "msg": "Incident is already closed"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidOperatorRole",
+      "msg": "Assigned operator must have the Operator role"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidEquipmentStatus",
+      "msg": "Invalid equipment status for this operation"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidRiskLevel",
+      "msg": "Risk level must be between 1 and 5"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidIncidentId",
+      "msg": "Provided incident ID does not match current counter"
+    }
+  ],
+  "types": [
+    {
+      "name": "EquipmentAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "nominal_consumption",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "EquipmentStatus"
+              }
+            }
+          },
+          {
+            "name": "reported_condition",
+            "type": {
+              "defined": {
+                "name": "ReportedCondition"
+              }
+            }
+          },
+          {
+            "name": "custodian",
+            "type": "pubkey"
+          },
+          {
+            "name": "incident_id",
+            "type": "u64"
+          },
+          {
+            "name": "use_start_time",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EquipmentAssigned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "incident_id",
+            "type": "u64"
+          },
+          {
+            "name": "equipment_code",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "operator",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EquipmentRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "EquipmentStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Available"
+          },
+          {
+            "name": "InUse"
+          },
+          {
+            "name": "InRepair"
+          },
+          {
+            "name": "Lost"
+          },
+          {
+            "name": "Returning"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GlobalState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "next_incident_id",
+            "type": "u64"
+          },
+          {
+            "name": "is_paused",
+            "type": "bool"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncidentAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "incident_id",
+            "type": "u64"
+          },
+          {
+            "name": "coordinates",
+            "type": "string"
+          },
+          {
+            "name": "risk_level",
+            "type": "u8"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "opened_at",
+            "type": "i64"
+          },
+          {
+            "name": "commander",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncidentClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "incident_id",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncidentOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "incident_id",
+            "type": "u64"
+          },
+          {
+            "name": "commander",
+            "type": "pubkey"
+          },
+          {
+            "name": "risk_level",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PersonnelAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "specialty",
+            "type": "string"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "role",
+            "type": {
+              "defined": {
+                "name": "Role"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PersonnelRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "role",
+            "type": {
+              "defined": {
+                "name": "Role"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReportedCondition",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Operational"
+          },
+          {
+            "name": "MinorDamage"
+          },
+          {
+            "name": "CriticalDamage"
+          },
+          {
+            "name": "Lost"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Admin"
+          },
+          {
+            "name": "OperationalBase"
+          },
+          {
+            "name": "SceneCommander"
+          },
+          {
+            "name": "Operator"
+          }
+        ]
+      }
+    }
+  ]
+}

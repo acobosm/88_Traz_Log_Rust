@@ -54,7 +54,7 @@ pub struct IncidentAccount {
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace, Debug)]
 pub enum Role {
     Admin,
     OperationalBase,
@@ -62,7 +62,7 @@ pub enum Role {
     Operator,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace, Debug)]
 pub enum EquipmentStatus {
     Available,
     InUse,
@@ -71,7 +71,7 @@ pub enum EquipmentStatus {
     Returning,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace, Debug)]
 pub enum ReportedCondition {
     Operational,
     MinorDamage,

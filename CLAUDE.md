@@ -14,7 +14,7 @@ Sistema de trazabilidad logística para operaciones de combate de incendios fore
 ## Stack
 - Anchor CLI 1.0.2
 - Solana CLI 3.1.10 (Agave)
-- Tests: TypeScript + Mocha (Anchor test framework)
+- Tests: Rust + LiteSVM 0.10 (Anchor 1.0 no usa TypeScript para tests)
 - Frontend: Vue.js + `@solana/wallet-adapter-vue` + Phantom
 - Red objetivo: Solana Devnet
 
@@ -168,11 +168,24 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] `CLAUDE.md` creado
 - [x] `.gitignore` creado
 - [x] `README.md` creado
-- [x] Rama `0_anchor_fundamentals` creada
-- [ ] `anchor init traz_log` ejecutado — inicio de Fase 0
-- [ ] Remotos `ghp`, `glp`, `gla` configurados
+- [x] `Informe_Tecnico.md` creado y actualizado
+- [x] `anchor init traz_log` ejecutado
+- [x] 9 instrucciones implementadas en `programs/traz_log/src/instructions/`
+- [x] 4 account structs + 3 enums + 5 eventos + 13 errores en `state.rs`, `events.rs`, `error.rs`
+- [x] Remoto `ghp` → `https://github.com/acobosm/88_Traz_Log_Rust.git`
+- [x] Remoto `glp` → `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git`
+- [ ] Remoto `gla` → pendiente (configurar desde agosto 3, 2026)
+- [x] Fase 0 completada — 3 tests en verde (`test_initialize.rs`)
+- [x] Fase 1 completada — 5 tests en verde (`test_toggle_pause.rs`)
+- [x] Fase 2 completada — 10 tests en verde (`test_register_personnel.rs`, `test_register_equipment.rs`)
+- [ ] Fase 3 — `open_fire_incident`, `assign_equipment`, `log_milestone` tests
+- [ ] Fase 4 — `initiate_return`, `close_incident`, flujo E2E
+- [ ] Fase 5 — Frontend Vue.js + Phantom
+- [ ] Fase 6 — Deploy Devnet + QA
 
-**Fase actual: 0_anchor_fundamentals — en progreso**
+**Fase actual: 3_incident_management — en progreso**
+**Tests acumulados: 18 pasando, 0 fallidos**
+**Adelanto respecto al cronograma: ~18 días**
 
 ---
 

@@ -178,14 +178,14 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] Fase 0 completada — 3 tests en verde (`test_initialize.rs`)
 - [x] Fase 1 completada — 5 tests en verde (`test_toggle_pause.rs`)
 - [x] Fase 2 completada — 10 tests en verde (`test_register_personnel.rs`, `test_register_equipment.rs`)
-- [ ] Fase 3 — `open_fire_incident`, `assign_equipment`, `log_milestone` tests
-- [ ] Fase 4 — `initiate_return`, `close_incident`, flujo E2E
+- [x] Fase 3 completada — 15 tests en verde (`test_open_fire_incident.rs`, `test_assign_equipment.rs`, `test_log_milestone.rs`)
+- [x] Fase 4 completada — 10 tests + 1 E2E en verde (`test_initiate_return.rs`, `test_close_incident.rs`, `test_e2e_full_flow.rs`)
 - [ ] Fase 5 — Frontend Vue.js + Phantom
 - [ ] Fase 6 — Deploy Devnet + QA
 
-**Fase actual: 3_incident_management — en progreso**
-**Tests acumulados: 18 pasando, 0 fallidos**
-**Adelanto respecto al cronograma: ~18 días**
+**Fase actual: 5_phantom_frontend — pendiente**
+**Tests acumulados: 43 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
+**Adelanto respecto al cronograma: ~30 días**
 
 ---
 

@@ -7,7 +7,7 @@
 | Campo | Detalle |
 |---|---|
 | **Proyecto** | FireOPS — Sistema de Trazabilidad Logística |
-| **Versión** | 0.1.0 (Fase 2 — Registro de personal y equipos verificado) |
+| **Versión** | 0.1.0 (Fase 3 — Gestión de incidentes verificada) |
 | **Fecha** | 2026-07-04 |
 | **Autor** | Andres C. |
 | **Repositorio** | `04_Rust_Practice/88_Traz_Log` |
@@ -567,7 +567,7 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-**Resumen acumulado:** 18 tests pasados, 0 fallidos.
+**Resumen acumulado:** 33 tests pasados, 0 fallidos.
 
 | Suite | Tests | Archivo |
 |---|---|---|
@@ -576,6 +576,9 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 | Fase 1 — Account Architecture | 5 | `tests/test_toggle_pause.rs` |
 | Fase 2 — Register Personnel | 5 | `tests/test_register_personnel.rs` |
 | Fase 2 — Register Equipment | 5 | `tests/test_register_equipment.rs` |
+| Fase 3 — Open Fire Incident | 6 | `tests/test_open_fire_incident.rs` |
+| Fase 3 — Assign Equipment | 5 | `tests/test_assign_equipment.rs` |
+| Fase 3 — Log Milestone | 4 | `tests/test_log_milestone.rs` |
 
 > **Sobre la warning:** El re-export glob genera un warning porque la función `handler` tiene el mismo nombre en todos los módulos. Es inofensiva — las instrucciones se invocan siempre por path completo en `lib.rs` (`register_personnel::handler(ctx, ...)`), eliminando toda ambigüedad en runtime.
 
@@ -621,7 +624,7 @@ La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BA
 | **0** | `0_anchor_fundamentals` | **Completada** | Workspace, 9 instrucciones, 3 tests de initialize |
 | **1** | `1_account_architecture` | **Completada** | Tamaño de GlobalState, deserialización de campos, 5 tests de toggle_pause |
 | **2** | `2_registration_and_inventory` | **Completada** | 10 tests: campos, tamaños, control de roles y deduplicación de PDAs; añadido `Debug` a los 3 enums |
-| 3 | `3_incident_management` | Pendiente | Tests de `open_fire_incident`, `assign_equipment`, `log_milestone` |
+| **3** | `3_incident_management` | **Completada** | 15 tests: IncidentAccount (tamaño, campos, contador), asignación de equipo, restricciones de rol y custodio en log_milestone |
 | 4 | `4_return_and_close` | Pendiente | Tests de `initiate_return`, `close_incident`, flujo E2E completo |
 | 5 | `5_phantom_frontend` | Pendiente | Vue.js + Phantom Wallet adapter |
 | 6 | `6_devnet_deploy` | Pendiente | Deploy a Solana Devnet + QA end-to-end |

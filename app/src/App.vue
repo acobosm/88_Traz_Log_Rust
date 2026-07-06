@@ -33,10 +33,10 @@
         <p>Conecta tu wallet Phantom para interactuar con el programa.</p>
       </div>
       <template v-else>
-        <DashboardView v-if="currentTab === 'dashboard'" />
-        <div v-else class="placeholder">
-          <p>Vista <strong>{{ currentTab }}</strong> — próximamente</p>
-        </div>
+        <DashboardView  v-if="currentTab === 'dashboard'" />
+        <AdminView      v-else-if="currentTab === 'admin'" />
+        <IncidenteView  v-else-if="currentTab === 'incidente'" />
+        <CampoView      v-else-if="currentTab === 'campo'" />
       </template>
     </main>
   </div>
@@ -46,6 +46,9 @@
 import { ref } from 'vue'
 import { useWallet } from './composables/useWallet'
 import DashboardView from './views/DashboardView.vue'
+import AdminView from './views/AdminView.vue'
+import IncidenteView from './views/IncidenteView.vue'
+import CampoView from './views/CampoView.vue'
 
 const { connected, shortAddress, connect, disconnect } = useWallet()
 

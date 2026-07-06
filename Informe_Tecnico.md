@@ -7,8 +7,8 @@
 | Campo | Detalle |
 |---|---|
 | **Proyecto** | FireOPS — Sistema de Trazabilidad Logística |
-| **Versión** | 0.1.0 (Fase 4 — Retorno, cierre y flujo E2E verificados) |
-| **Fecha** | 2026-07-04 |
+| **Versión** | 0.1.0 (Fase 5 — Frontend Vue 3 + Phantom completado) |
+| **Fecha** | 2026-07-06 |
 | **Autor** | Andres C. |
 | **Repositorio** | `04_Rust_Practice/88_Traz_Log` |
 | **Contrato original** | `TrazabilidadLogistica.sol` (635 líneas, Solidity ^0.8.19) |
@@ -31,6 +31,8 @@ La migración no es un port 1:1 — Solana opera bajo un modelo de ejecución fu
 
 ## 2. Stack Tecnológico
 
+**Backend (on-chain)**
+
 | Herramienta | Versión | Rol |
 |---|---|---|
 | Rust | 1.89.0 | Lenguaje del programa on-chain |
@@ -39,6 +41,17 @@ La migración no es un port 1:1 — Solana opera bajo un modelo de ejecución fu
 | anchor-lang | 1.1.2 | Crate de macros y runtime de Anchor |
 | LiteSVM | 0.10.0 | Simulador de Solana para tests en Rust |
 | Red objetivo | Solana Devnet / Localnet | |
+
+**Frontend (app/)**
+
+| Herramienta | Versión | Rol |
+|---|---|---|
+| Vue 3 + Vite | 3.x / 8.x | Framework UI y bundler |
+| TypeScript | 5.x | Tipado estático |
+| `@coral-xyz/anchor` | latest | Cliente del programa (usa el IDL generado) |
+| `@solana/web3.js` | latest | Conexión RPC, Pubkeys, transacciones |
+| `@solana/wallet-adapter-phantom` | latest | Adaptador Phantom Wallet |
+| `vite-plugin-node-polyfills` | latest | Polyfills de Buffer/Crypto para el navegador |
 
 ---
 
@@ -110,32 +123,56 @@ En Solidity, `cerrarIncidente` iteraba el array `recursosAsignados[]` para cambi
 ## 4. Estructura de Archivos
 
 ```
-traz_log/
-├── Anchor.toml                         Configuración del workspace
-├── Cargo.toml                          Workspace Cargo (dependencias)
-├── rust-toolchain.toml                 Pinea Rust 1.89.0
-├── programs/
-│   └── traz_log/
-│       ├── Cargo.toml                  Dependencias del programa
-│       └── src/
-│           ├── lib.rs                  Punto de entrada, enruta instrucciones
-│           ├── constants.rs            Seeds de los 4 PDAs
-│           ├── state.rs                Account structs y enums
-│           ├── events.rs               Structs de eventos emit!
-│           ├── error.rs                Códigos de error custom
-│           ├── instructions.rs         Módulo agregador (re-exports)
-│           └── instructions/
-│               ├── initialize.rs       Setup del GlobalState
-│               ├── toggle_pause.rs     Pausa/reanuda el sistema
-│               ├── register_personnel.rs  Registra brigadista
-│               ├── register_equipment.rs  Registra equipo
-│               ├── open_fire_incident.rs  Abre incidente
-│               ├── assign_equipment.rs    Asigna equipo a operador
-│               ├── log_milestone.rs       Reporta estado del equipo
-│               ├── initiate_return.rs     Inicia retorno del equipo
-│               └── close_incident.rs      Cierra incidente (lazy)
-└── tests/
-    └── test_initialize.rs              Tests de integración con LiteSVM
+88_Traz_Log/
+├── traz_log/                           Programa Anchor (backend on-chain)
+│   ├── Anchor.toml
+│   ├── Cargo.toml
+│   ├── rust-toolchain.toml             Pinea Rust 1.89.0
+│   ├── programs/traz_log/src/
+│   │   ├── lib.rs                      Punto de entrada, enruta instrucciones
+│   │   ├── constants.rs                Seeds de los 4 PDAs
+│   │   ├── state.rs                    Account structs y enums
+│   │   ├── events.rs                   Structs de eventos emit!
+│   │   ├── error.rs                    Códigos de error custom
+│   │   ├── instructions.rs             Módulo agregador (glob re-exports)
+│   │   └── instructions/
+│   │       ├── initialize.rs
+│   │       ├── toggle_pause.rs
+│   │       ├── register_personnel.rs
+│   │       ├── register_equipment.rs
+│   │       ├── open_fire_incident.rs
+│   │       ├── assign_equipment.rs
+│   │       ├── log_milestone.rs
+│   │       ├── initiate_return.rs
+│   │       └── close_incident.rs
+│   ├── target/idl/traz_log.json        IDL generado por anchor build
+│   └── tests/                          11 suites LiteSVM (43 tests)
+│       ├── test_initialize.rs
+│       ├── test_toggle_pause.rs
+│       ├── test_register_personnel.rs
+│       ├── test_register_equipment.rs
+│       ├── test_open_fire_incident.rs
+│       ├── test_assign_equipment.rs
+│       ├── test_log_milestone.rs
+│       ├── test_initiate_return.rs
+│       ├── test_close_incident.rs
+│       └── test_e2e_full_flow.rs
+└── app/                                Frontend Vue 3 + Phantom (Fase 5)
+    ├── vite.config.ts
+    ├── tsconfig.app.json
+    └── src/
+        ├── main.ts
+        ├── App.vue                     Shell: header, nav, wallet connect
+        ├── style.css                   Design system oscuro (CSS variables)
+        ├── idl/traz_log.json           Copia del IDL para el cliente Anchor
+        ├── composables/
+        │   ├── useWallet.ts            Adaptador Phantom (connect/disconnect)
+        │   └── useProgram.ts           PDAs + 9 instrucciones + lecturas
+        └── views/
+            ├── DashboardView.vue       Lee GlobalState en tiempo real
+            ├── AdminView.vue           toggle_pause, register_personnel/equipment
+            ├── IncidenteView.vue       open/assign/close incident
+            └── CampoView.vue          log_milestone, initiate_return, consulta equipo
 ```
 
 ---
@@ -491,6 +528,57 @@ Construye y envía la transacción `initialize` completa. Reutilizada por el seg
 
 ---
 
+### 5.9 Frontend — `app/src/`
+
+El frontend es una **SPA Vue 3 + Vite** que interactúa con el programa on-chain a través del IDL generado por Anchor.
+
+#### `composables/useWallet.ts`
+
+Encapsula el ciclo de vida del adaptador Phantom. Expone un singleton reactivo (`connected`, `publicKey`, `shortAddress`) accesible desde cualquier componente. Los eventos `connect` y `disconnect` del adaptador actualizan el estado de Vue automáticamente.
+
+| Export | Tipo | Descripción |
+|---|---|---|
+| `connected` | `Ref<boolean>` | true si Phantom está conectado |
+| `publicKey` | `Ref<PublicKey \| null>` | clave pública activa |
+| `shortAddress` | `ComputedRef<string>` | formato `ABCD…WXYZ` para la UI |
+| `connect()` | async | abre el popup de Phantom |
+| `disconnect()` | async | desconecta la wallet |
+
+#### `composables/useProgram.ts`
+
+Crea un cliente `Program` de Anchor usando el IDL y el adaptador de wallet. El programa se re-computa automáticamente cuando cambia el estado de conexión (es un `computed`).
+
+**PDAs disponibles:**
+
+| Función | Seeds |
+|---|---|
+| `globalStatePda()` | `[b"global"]` |
+| `personnelPda(wallet)` | `[b"personnel", wallet]` |
+| `equipmentPda(code)` | `[b"equipment", code[32]]` |
+| `incidentPda(id)` | `[b"incident", id.to_le_bytes()]` |
+
+**Instrucciones disponibles:** `togglePause`, `registerPersonnel`, `registerEquipment`, `openFireIncident`, `assignEquipment`, `closeIncident`, `logMilestone`, `initiateReturn` — las 9 instrucciones del programa conectadas al cliente Anchor.
+
+**Función helper `toCode(s: string): number[]`** — convierte un string a `[u8; 32]` rellenando con ceros, equivalente a la función `to_code()` de los tests Rust.
+
+#### `views/DashboardView.vue`
+
+Lee `GlobalState` en `onMounted` y en cada click de "Actualizar". Muestra 4 cards: estado del sistema (badge verde/rojo), próximo ID de incidente, dirección del admin y program ID. Llama a `fetchGlobalState()` del composable.
+
+#### `views/AdminView.vue`
+
+Tres secciones: (1) botón `toggle_pause`; (2) formulario de registro de personal (wallet, nombre, especialidad, rol via dropdown); (3) formulario de registro de equipo (código max 32 chars, descripción, consumo nominal). Cada acción muestra feedback ✓/✗ inline sin recargar la página.
+
+#### `views/IncidenteView.vue`
+
+Tres secciones: (1) abrir incidente — lee `nextIncidentId` automáticamente de `GlobalState` para no requerir entrada manual; (2) asignar equipo a operador (código, id de incidente, wallet del operador); (3) cerrar incidente (botón rojo de peligro para distinguirlo visualmente).
+
+#### `views/CampoView.vue`
+
+Tres secciones: (1) reportar condición del equipo (código, condición via dropdown, notas); (2) iniciar retorno (código del equipo); (3) consulta de estado — permite leer el `EquipmentAccount` on-chain y muestra estado, condición, custodio e id de incidente en cards.
+
+---
+
 ## 6. Cálculo de Espacio de Cuentas
 
 Anchor 1.0 usa `#[derive(InitSpace)]` para calcular el espacio automáticamente. Para `String`, `#[max_len(N)]` reserva `4 + N` bytes (4 para el prefijo de longitud `u32` + N para el contenido máximo).
@@ -629,8 +717,8 @@ La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BA
 | **2** | `2_registration_and_inventory` | **Completada** | 10 tests: campos, tamaños, control de roles y deduplicación de PDAs; añadido `Debug` a los 3 enums |
 | **3** | `3_incident_management` | **Completada** | 15 tests: IncidentAccount (tamaño, campos, contador), asignación de equipo, restricciones de rol y custodio en log_milestone |
 | **4** | `4_return_and_close` | **Completada** | 10 tests: retorno de equipo (custodia, doble retorno, roles), cierre de incidente (lazy-close, idempotencia, roles); 1 test E2E del ciclo completo de 8 pasos |
-| 5 | `5_phantom_frontend` | Pendiente | Vue.js + Phantom Wallet adapter |
-| 6 | `6_devnet_deploy` | Pendiente | Deploy a Solana Devnet + QA end-to-end |
+| **5** | `5_phantom_frontend` | **Completada** | Vue 3 + Vite + Phantom: `useWallet`, `useProgram`, 4 vistas, 9 instrucciones conectadas, build sin errores |
+| 6 | `6_devnet_deploy` | Pendiente | Deploy a Solana Devnet + QA end-to-end con Phantom real |
 | *(opt)* | `7_onchain_log` | Opcional | `LogEntry` PDAs, bitácora histórica queryable |
 
 ### Remotos Git configurados

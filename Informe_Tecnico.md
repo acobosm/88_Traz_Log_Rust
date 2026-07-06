@@ -170,7 +170,8 @@ En Solidity, `cerrarIncidente` iteraba el array `recursosAsignados[]` para cambi
         │   └── useProgram.ts           PDAs + 9 instrucciones + lecturas
         └── views/
             ├── DashboardView.vue       Lee GlobalState en tiempo real
-            ├── AdminView.vue           toggle_pause, register_personnel/equipment
+            ├── InventarioView.vue      Listado completo de personal, equipos e incidentes
+            ├── AdminView.vue           initialize, toggle_pause, register_personnel/equipment
             ├── IncidenteView.vue       open/assign/close incident
             └── CampoView.vue          log_milestone, initiate_return, consulta equipo
 ```
@@ -557,7 +558,9 @@ Crea un cliente `Program` de Anchor usando el IDL y el adaptador de wallet. El p
 | `equipmentPda(code)` | `[b"equipment", code[32]]` |
 | `incidentPda(id)` | `[b"incident", id.to_le_bytes()]` |
 
-**Instrucciones disponibles:** `togglePause`, `registerPersonnel`, `registerEquipment`, `openFireIncident`, `assignEquipment`, `closeIncident`, `logMilestone`, `initiateReturn` — las 9 instrucciones del programa conectadas al cliente Anchor.
+**Instrucciones disponibles:** `initialize`, `togglePause`, `registerPersonnel`, `registerEquipment`, `openFireIncident`, `assignEquipment`, `closeIncident`, `logMilestone`, `initiateReturn` — las 9 instrucciones del programa conectadas al cliente Anchor.
+
+**Lecturas disponibles:** `fetchGlobalState()`, `fetchIncident(id)`, `fetchEquipment(code)`, `fetchAllPersonnel()`, `fetchAllEquipment()`, `fetchAllIncidents()` — las últimas tres usan `getProgramAccounts` para listar todas las cuentas del tipo correspondiente.
 
 **Función helper `toCode(s: string): number[]`** — convierte un string a `[u8; 32]` rellenando con ceros, equivalente a la función `to_code()` de los tests Rust.
 
@@ -567,7 +570,11 @@ Lee `GlobalState` en `onMounted` y en cada click de "Actualizar". Muestra 4 card
 
 #### `views/AdminView.vue`
 
-Tres secciones: (1) botón `toggle_pause`; (2) formulario de registro de personal (wallet, nombre, especialidad, rol via dropdown); (3) formulario de registro de equipo (código max 32 chars, descripción, consumo nominal). Cada acción muestra feedback ✓/✗ inline sin recargar la página.
+Cuatro secciones: (1) banner naranja "Primera ejecución — Inicializar sistema" con botón `initialize` (uso único); (2) botón `toggle_pause`; (3) formulario de registro de personal (wallet, nombre, especialidad, rol via dropdown); (4) formulario de registro de equipo (código max 32 chars, descripción, consumo nominal). Cada acción muestra feedback ✓/✗ inline sin recargar la página.
+
+#### `views/InventarioView.vue`
+
+Tres tablas en tiempo real: personal registrado, equipos y incidentes. Carga todas las cuentas on-chain con `Promise.all([fetchAllPersonnel(), fetchAllEquipment(), fetchAllIncidents()])` al montar y al presionar "Actualizar". Muestra contadores totales en el encabezado. Incluye formatters de presentación: `codeToStr` (bytes[32] → string), `formatRole`, `formatStatus`, `formatCondition`, y `shortKey` (pubkey abreviada). Los badges de estado de equipo son verdes (disponible), amarillos (en uso / retornando) o rojos (reparación / perdido); el nivel de riesgo del incidente se colorea via atributo `data-level` en CSS. Accesible con cualquier wallet conectada (sin restricción de rol).
 
 #### `views/IncidenteView.vue`
 

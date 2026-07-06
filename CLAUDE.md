@@ -180,7 +180,7 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] Fase 2 completada — 10 tests en verde (`test_register_personnel.rs`, `test_register_equipment.rs`)
 - [x] Fase 3 completada — 15 tests en verde (`test_open_fire_incident.rs`, `test_assign_equipment.rs`, `test_log_milestone.rs`)
 - [x] Fase 4 completada — 10 tests + 1 E2E en verde (`test_initiate_return.rs`, `test_close_incident.rs`, `test_e2e_full_flow.rs`)
-- [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 4 vistas (Dashboard, Admin, Incidente, Campo), las 9 instrucciones conectadas, build limpio
+- [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 5 vistas (Dashboard, Inventario, Admin, Incidente, Campo), las 9 instrucciones + 6 lecturas conectadas, build limpio, flujo completo validado en localnet
 - [ ] Fase 6 — Deploy Devnet + QA end-to-end
 
 **Fase actual: 6_devnet_deploy — pendiente**

@@ -10,4 +10,10 @@ export default defineConfig({
   define: {
     'process.env.ANCHOR_BROWSER': 'true',
   },
+  server: {
+    headers: {
+      // @solana/web3.js y @coral-xyz/anchor usan eval() internamente
+      'Content-Security-Policy': "script-src 'self' 'unsafe-eval' 'unsafe-inline'; worker-src blob:;",
+    },
+  },
 })

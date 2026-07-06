@@ -33,10 +33,11 @@
         <p>Conecta tu wallet Phantom para interactuar con el programa.</p>
       </div>
       <template v-else>
-        <DashboardView  v-if="currentTab === 'dashboard'" />
-        <AdminView      v-else-if="currentTab === 'admin'" />
-        <IncidenteView  v-else-if="currentTab === 'incidente'" />
-        <CampoView      v-else-if="currentTab === 'campo'" />
+        <DashboardView   v-if="currentTab === 'dashboard'" />
+        <InventarioView  v-else-if="currentTab === 'inventario'" />
+        <AdminView       v-else-if="currentTab === 'admin'" />
+        <IncidenteView   v-else-if="currentTab === 'incidente'" />
+        <CampoView       v-else-if="currentTab === 'campo'" />
       </template>
     </main>
   </div>
@@ -49,14 +50,16 @@ import DashboardView from './views/DashboardView.vue'
 import AdminView from './views/AdminView.vue'
 import IncidenteView from './views/IncidenteView.vue'
 import CampoView from './views/CampoView.vue'
+import InventarioView from './views/InventarioView.vue'
 
 const { connected, shortAddress, connect, disconnect } = useWallet()
 
 const currentTab = ref('dashboard')
 const tabs = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'admin',     label: 'Admin' },
-  { id: 'incidente', label: 'Incidente' },
-  { id: 'campo',     label: 'Campo' },
+  { id: 'dashboard',  label: 'Dashboard' },
+  { id: 'inventario', label: 'Inventario' },
+  { id: 'admin',      label: 'Admin' },
+  { id: 'incidente',  label: 'Incidente' },
+  { id: 'campo',      label: 'Campo' },
 ]
 </script>

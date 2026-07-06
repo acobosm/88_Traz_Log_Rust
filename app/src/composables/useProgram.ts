@@ -82,7 +82,32 @@ export function useProgram() {
     return (program.value.account as any).equipmentAccount.fetch(equipmentPda(code))
   }
 
+  async function fetchAllPersonnel(): Promise<{ publicKey: PublicKey; account: any }[]> {
+    if (!program.value) return []
+    return (program.value.account as any).personnelAccount.all()
+  }
+
+  async function fetchAllEquipment(): Promise<{ publicKey: PublicKey; account: any }[]> {
+    if (!program.value) return []
+    return (program.value.account as any).equipmentAccount.all()
+  }
+
+  async function fetchAllIncidents(): Promise<{ publicKey: PublicKey; account: any }[]> {
+    if (!program.value) return []
+    return (program.value.account as any).incidentAccount.all()
+  }
+
   // ── Instrucciones ─────────────────────────────────────────────────────────
+
+  async function initialize() {
+    if (!program.value) throw new Error('No conectado')
+    const { publicKey: pk } = useWallet()
+    if (!pk.value) throw new Error('Sin wallet')
+    return (program.value.methods as any)
+      .initialize()
+      .accounts({ admin: pk.value, globalState: globalStatePda() })
+      .rpc()
+  }
 
   async function togglePause() {
     if (!program.value) throw new Error('No conectado')
@@ -191,12 +216,16 @@ export function useProgram() {
     program,
     PROGRAM_ID,
     globalStatePda,
+    initialize,
     personnelPda,
     equipmentPda,
     incidentPda,
     fetchGlobalState,
     fetchIncident,
     fetchEquipment,
+    fetchAllPersonnel,
+    fetchAllEquipment,
+    fetchAllIncidents,
     togglePause,
     registerPersonnel,
     registerEquipment,

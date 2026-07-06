@@ -1,6 +1,18 @@
 <template>
   <div class="view">
 
+    <!-- Inicializar sistema (primera ejecución) -->
+    <section class="section section-init">
+      <h2>⚡ Primera ejecución — Inicializar sistema</h2>
+      <p class="init-desc">Crea el GlobalState PDA en la cadena. Llama esto <strong>una sola vez</strong> con la wallet que será el admin permanente.</p>
+      <div class="row-actions">
+        <button class="btn-primary" :disabled="busy.init" @click="handleInitialize">
+          {{ busy.init ? 'Enviando…' : 'Initialize Sistema' }}
+        </button>
+        <span v-if="feedback.init" :class="feedbackClass(feedback.init)">{{ feedback.init }}</span>
+      </div>
+    </section>
+
     <!-- Toggle Pause -->
     <section class="section">
       <h2>Estado del sistema</h2>
@@ -72,16 +84,26 @@ import { reactive } from 'vue'
 import { PublicKey } from '@solana/web3.js'
 import { useProgram, toCode } from '../composables/useProgram'
 
-const { togglePause, registerPersonnel, registerEquipment } = useProgram()
+const { initialize, togglePause, registerPersonnel, registerEquipment } = useProgram()
 
-const busy = reactive({ pause: false, personnel: false, equipment: false })
-const feedback = reactive({ pause: '', personnel: '', equipment: '' })
+const busy = reactive({ init: false, pause: false, personnel: false, equipment: false })
+const feedback = reactive({ init: '', pause: '', personnel: '', equipment: '' })
 
 const personnel = reactive({ wallet: '', name: '', specialty: '', role: 'operator' })
 const equipment = reactive({ code: '', description: '', consumption: 0 })
 
 function feedbackClass(msg: string) {
   return msg.startsWith('✓') ? 'feedback-ok' : 'feedback-err'
+}
+
+async function handleInitialize() {
+  busy.init = true; feedback.init = ''
+  try {
+    await initialize()
+    feedback.init = '✓ Sistema inicializado — tu wallet es el admin'
+  } catch (e: any) {
+    feedback.init = '✗ ' + (e.message ?? e)
+  } finally { busy.init = false }
 }
 
 async function handleTogglePause() {

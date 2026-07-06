@@ -96,6 +96,11 @@ main { flex: 1; padding: 2rem 1.5rem; max-width: 960px; margin: 0 auto; width: 1
 
 code { background: var(--border); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
 
+/* Init banner */
+.section-init { border-color: var(--accent); background: #f9731608; }
+.section-init h2 { color: var(--accent); }
+.init-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+
 /* Views */
 .view { display: flex; flex-direction: column; gap: 2rem; }
 .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
@@ -129,6 +134,23 @@ code { background: var(--border); padding: 0.1rem 0.4rem; border-radius: 4px; fo
 }
 .btn-danger:hover:not(:disabled) { opacity: 0.85; }
 .btn-danger:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Inventario */
+.inv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.inv-counts { font-size: 0.8rem; color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th { text-align: left; padding: 0.5rem 0.75rem; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); }
+td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #ffffff05; }
+.empty { color: var(--muted); font-size: 0.85rem; padding: 0.5rem 0; }
+.badge-role { font-size: 0.75rem; background: var(--border); padding: 0.2rem 0.5rem; border-radius: 4px; }
+.badge-yellow { background: #eab30820; color: #eab308; border: 1px solid #eab308; border-radius: 999px; padding: 0.2rem 0.55rem; font-size: 0.75rem; font-weight: 700; }
+.risk-badge { font-weight: 700; font-size: 0.85rem; }
+[data-level="4"], [data-level="5"] { color: var(--red); }
+[data-level="3"] { color: #eab308; }
+[data-level="1"], [data-level="2"] { color: var(--green); }
 
 /* Feedback */
 .feedback-ok  { font-size: 0.85rem; color: var(--green); }

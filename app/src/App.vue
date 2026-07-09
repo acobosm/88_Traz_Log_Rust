@@ -58,8 +58,8 @@ const currentTab = ref('dashboard')
 const tabs = [
   { id: 'dashboard',  label: 'Dashboard' },
   { id: 'inventario', label: 'Inventario' },
-  { id: 'admin',      label: 'Admin' },
   { id: 'incidente',  label: 'Incidente' },
   { id: 'campo',      label: 'Campo' },
+  { id: 'admin',      label: 'Admin' },
 ]
 </script>

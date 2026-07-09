@@ -82,6 +82,15 @@ export function useProgram() {
     return (program.value.account as any).equipmentAccount.fetch(equipmentPda(code))
   }
 
+  async function fetchLogEntries(code: number[]): Promise<{ publicKey: PublicKey; account: any }[]> {
+    if (!program.value) return []
+    const codeStr = String.fromCharCode(...code.filter(b => b !== 0))
+    const all = await (program.value.account as any).logEntry.all()
+    return (all as any[])
+      .filter(e => String.fromCharCode(...e.account.equipmentCode.filter((b: number) => b !== 0)) === codeStr)
+      .sort((a, b) => Number(a.account.entryIndex.toString()) - Number(b.account.entryIndex.toString()))
+  }
+
   async function fetchAllPersonnel(): Promise<{ publicKey: PublicKey; account: any }[]> {
     if (!program.value) return []
     return (program.value.account as any).personnelAccount.all()
@@ -139,12 +148,12 @@ export function useProgram() {
       .rpc()
   }
 
-  async function openFireIncident(incidentId: number, coordinates: string, riskLevel: number) {
+  async function openFireIncident(incidentId: number, description: string, coordinates: string, riskLevel: number) {
     if (!program.value) throw new Error('No conectado')
     const { publicKey: pk } = useWallet()
     if (!pk.value) throw new Error('Sin wallet')
     return (program.value.methods as any)
-      .openFireIncident(new BN(incidentId), coordinates, riskLevel)
+      .openFireIncident(new BN(incidentId), description, coordinates, riskLevel)
       .accounts({
         globalState: globalStatePda(),
         signerPersonnel: personnelPda(pk.value),
@@ -226,6 +235,7 @@ export function useProgram() {
     fetchAllPersonnel,
     fetchAllEquipment,
     fetchAllIncidents,
+    fetchLogEntries,
     togglePause,
     registerPersonnel,
     registerEquipment,

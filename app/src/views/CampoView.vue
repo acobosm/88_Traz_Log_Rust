@@ -4,9 +4,15 @@
     <!-- Log Milestone -->
     <section class="section">
       <h2>Reportar condición de equipo</h2>
-      <form class="form-grid" @submit.prevent="handleLogMilestone">
-        <label>Código del equipo
-          <input v-model="milestone.code" placeholder="Ej: BOMBA-01" maxlength="32" required />
+      <div v-if="myEquipment.length === 0" class="empty">No tienes equipos bajo custodia en este momento.</div>
+      <form v-else class="form-grid" @submit.prevent="handleLogMilestone">
+        <label>Equipo bajo tu custodia
+          <select v-model="milestone.code" required>
+            <option value="" disabled>— selecciona un equipo —</option>
+            <option v-for="e in myEquipment" :key="e.publicKey.toBase58()" :value="codeToStr(e.account.code)">
+              {{ codeToStr(e.account.code) }} — {{ e.account.description }}
+            </option>
+          </select>
         </label>
         <label>Condición
           <select v-model="milestone.condition">
@@ -31,9 +37,15 @@
     <!-- Initiate Return -->
     <section class="section">
       <h2>Iniciar retorno de equipo</h2>
-      <form class="form-grid" @submit.prevent="handleInitiateReturn">
-        <label>Código del equipo
-          <input v-model="ret.code" placeholder="Ej: BOMBA-01" maxlength="32" required />
+      <div v-if="myEquipment.length === 0" class="empty">No tienes equipos bajo custodia en este momento.</div>
+      <form v-else class="form-grid" @submit.prevent="handleInitiateReturn">
+        <label>Equipo bajo tu custodia
+          <select v-model="ret.code" required>
+            <option value="" disabled>— selecciona un equipo —</option>
+            <option v-for="e in myEquipment" :key="e.publicKey.toBase58()" :value="codeToStr(e.account.code)">
+              {{ codeToStr(e.account.code) }} — {{ e.account.description }}
+            </option>
+          </select>
         </label>
         <div class="form-footer">
           <button type="submit" class="btn-primary" :disabled="busy.ret">
@@ -82,10 +94,12 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import { useProgram, toCode } from '../composables/useProgram'
+import { useWallet } from '../composables/useWallet'
 
-const { logMilestone, initiateReturn, fetchEquipment } = useProgram()
+const { logMilestone, initiateReturn, fetchEquipment, fetchAllEquipment } = useProgram()
+const { publicKey } = useWallet()
 
 const busy = reactive({ milestone: false, ret: false, query: false })
 const feedback = reactive({ milestone: '', ret: '', query: '' })
@@ -94,6 +108,25 @@ const milestone = reactive({ code: '', condition: 'operational', notes: '' })
 const ret = reactive({ code: '' })
 const query = reactive({ code: '' })
 const equipmentData = ref<any>(null)
+const allEquipment = ref<any[]>([])
+
+const myEquipment = computed(() => {
+  if (!publicKey.value) return []
+  const myPk = publicKey.value.toBase58()
+  return allEquipment.value.filter(e => {
+    const custodian = e.account.custodian?.toBase58?.() ?? ''
+    return custodian === myPk && Object.keys(e.account.status)[0] === 'inUse'
+  })
+})
+
+onMounted(async () => {
+  allEquipment.value = await fetchAllEquipment()
+})
+
+// ── Formatters ─────────────────────────────────────────────────────────────
+function codeToStr(code: number[]): string {
+  return String.fromCharCode(...code.filter(b => b !== 0))
+}
 
 function feedbackClass(msg: string) {
   return msg.startsWith('✓') ? 'feedback-ok' : 'feedback-err'
@@ -120,6 +153,7 @@ function formatCondition(c: any): string {
   return map[Object.keys(c)[0]] ?? Object.keys(c)[0]
 }
 
+// ── Handlers ───────────────────────────────────────────────────────────────
 async function handleLogMilestone() {
   busy.milestone = true; feedback.milestone = ''
   try {
@@ -127,6 +161,7 @@ async function handleLogMilestone() {
     await logMilestone(toCode(milestone.code), milestone.notes, conditionVariant)
     feedback.milestone = '✓ Condición reportada'
     milestone.code = ''; milestone.notes = ''
+    allEquipment.value = await fetchAllEquipment()
   } catch (e: any) {
     feedback.milestone = '✗ ' + (e.message ?? e)
   } finally { busy.milestone = false }
@@ -138,6 +173,7 @@ async function handleInitiateReturn() {
     await initiateReturn(toCode(ret.code))
     feedback.ret = '✓ Retorno iniciado'
     ret.code = ''
+    allEquipment.value = await fetchAllEquipment()
   } catch (e: any) {
     feedback.ret = '✗ ' + (e.message ?? e)
   } finally { busy.ret = false }

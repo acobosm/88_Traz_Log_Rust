@@ -51,7 +51,7 @@ Scope reducido respecto al contrato original. Análisis completo en `Reference/`
 
 ### Excluido del MVP (fase opcional si sobran días)
 - Handshake de 3 pasos: `register_audit` + `sign_release`
-- Bitácora on-chain: `LogEntry` PDAs — posible en `7_onchain_log`
+- ~~Bitácora on-chain: `LogEntry` PDAs — posible en `7_onchain_log`~~ → **adelantada e implementada en Fase 5** (ver estado actual)
 - `register_equipment_batch` (multi-tx)
 - `log_tactical_note`
 - `update_fire_risk`
@@ -70,6 +70,7 @@ Scope reducido respecto al contrato original. Análisis completo en `Reference/`
 | `PersonnelAccount` | `[b"personnel", wallet_pubkey.as_ref()]` | `mapping(address => Personal)` |
 | `EquipmentAccount` | `[b"equipment", code[32]]` | `mapping(bytes32 => Insumo)` |
 | `IncidentAccount` | `[b"incident", &id.to_le_bytes()]` | `mapping(uint256 => EventoIncendio)` |
+| `LogEntry` (adelanto `7_onchain_log`) | `[b"log", equipment_code[32], entry_index.to_le_bytes()]` | Bitácora histórica, sin equivalente 1:1 en el contrato original |
 
 *Tamaños exactos en bytes se calculan en Fase 1 antes de `anchor build`.*
 
@@ -98,11 +99,13 @@ Scope reducido respecto al contrato original. Análisis completo en `Reference/`
 | Decisión | Opción elegida | Razón |
 |---|---|---|
 | `close_incident` | **Lazy transition** | Solo marca `active = false`. Cada operador llama `initiate_return` individualmente. Evita iterar array dinámico y el límite de ~32 accounts por tx de Solana. |
-| Bitácora | **`emit!` (MVP)** | Sin `LogEntry` PDAs. La bitácora histórica queryable puede agregarse en `7_onchain_log`. |
+| Bitácora | **`LogEntry` PDA (adelantado a Fase 5)** | `log_milestone` ahora crea un PDA histórico por reporte (`seeds = ["log", code, entry_index]`) además de emitir el evento. Se adelantó `7_onchain_log` porque el costo de implementarlo era bajo y da queryabilidad real desde el frontend. |
 | `register_equipment_batch` | **Eliminado en MVP** | Reemplazado por registros individuales. El batch de 51 items requiere `signAllTransactions` — complejidad no esencial para el MVP. |
 | RBAC | **Campo `role: Role` en `PersonnelAccount`** | Sin `AccessControl` de OZ. Verificación via `constraint =` en cada Accounts struct. |
 | Roles activos | **4 roles** | Admin, OperationalBase, SceneCommander, Operator. Auditor y Consultant fuera del MVP. |
 | `tx.origin` de Solidity | **Eliminado** | En Solana el signer es siempre explícito. Elimina la vulnerabilidad Media del contrato original. |
+| Doble compromiso de operador | **Campos `current_incident`/`active_assignments` en `PersonnelAccount`** | El contrato Solidity original no impedía que un operador quedara custodio en dos incidentes activos a la vez. Se detectó en QA manual de Fase 5 y se corrigió con error `OperatorAlreadyAssigned`. |
+| Suplantación de comando en `assign_equipment` | **`constraint = incident.commander == signer.key()`** | Un `SceneCommander` podía asignar equipo a un incidente que no había abierto él. Corregido con error `NotIncidentCommander`. |
 
 ---
 
@@ -115,9 +118,9 @@ Scope reducido respecto al contrato original. Análisis completo en `Reference/`
 | 2 | `2_registration_and_inventory` | `toggle_pause`, `register_personnel`, `register_equipment` + tests TS | Jul 18–22 |
 | 3 | `3_incident_management` | `open_fire_incident`, `assign_equipment`, `log_milestone` + tests TS | Jul 22–29 |
 | 4 | `4_return_and_close` | `initiate_return`, `close_incident` + tests TS + flujo E2E completo | Jul 29–Aug 5 |
-| 5 | `5_phantom_frontend` | Vue.js reescrito: wallet adapter, paneles por rol, `getProgramAccounts`, event listeners | Aug 5–17 |
+| 5 | `5_phantom_frontend` | Vue.js reescrito: wallet adapter, paneles por rol, `getProgramAccounts`, event listeners. Incluye adelanto de `LogEntry` PDAs (bitácora on-chain) | Aug 5–17 |
 | 6 | `6_devnet_deploy` | `anchor deploy devnet`, QA manual con Phantom, verificar rent, correcciones UX | Aug 17–22 |
-| *(opt)* | `7_onchain_log` | `LogEntry` PDAs, bitácora histórica queryable | Si sobran días |
+| ~~*(opt)*~~ | ~~`7_onchain_log`~~ | **Absorbida en Fase 5** — ya no requiere rama propia | — |
 
 **Criterio de "done" por fase:**
 - Fases 0–4: `anchor test` pasa en verde (localnet)
@@ -171,7 +174,7 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] `Informe_Tecnico.md` creado y actualizado
 - [x] `anchor init traz_log` ejecutado
 - [x] 9 instrucciones implementadas en `programs/traz_log/src/instructions/`
-- [x] 4 account structs + 3 enums + 5 eventos + 13 errores en `state.rs`, `events.rs`, `error.rs`
+- [x] 5 account structs (incluye `LogEntry`) + 3 enums + 5 eventos + 14 errores en `state.rs`, `events.rs`, `error.rs`
 - [x] Remoto `ghp` → `https://github.com/acobosm/88_Traz_Log_Rust.git`
 - [x] Remoto `glp` → `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git`
 - [ ] Remoto `gla` → pendiente (configurar desde agosto 3, 2026)
@@ -180,11 +183,12 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] Fase 2 completada — 10 tests en verde (`test_register_personnel.rs`, `test_register_equipment.rs`)
 - [x] Fase 3 completada — 15 tests en verde (`test_open_fire_incident.rs`, `test_assign_equipment.rs`, `test_log_milestone.rs`)
 - [x] Fase 4 completada — 10 tests + 1 E2E en verde (`test_initiate_return.rs`, `test_close_incident.rs`, `test_e2e_full_flow.rs`)
-- [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 5 vistas (Dashboard, Inventario, Admin, Incidente, Campo), las 9 instrucciones + 6 lecturas conectadas, build limpio, flujo completo validado en localnet
-- [ ] Fase 6 — Deploy Devnet + QA end-to-end
+- [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 5 vistas (Dashboard, Inventario, Admin, Incidente, Campo), las 9 instrucciones + 7 lecturas conectadas, build limpio, flujo completo validado en localnet
+- [x] Fase 5 (adelanto) — Guardrails `NotIncidentCommander` y `OperatorAlreadyAssigned` en `assign_equipment` (2 tests nuevos), bitácora on-chain `LogEntry` (`log_milestone` crea PDA histórico, 4 tests en `test_log_entry.rs`), panel de incidente + modal de bitácora en `IncidenteView.vue`
+- [ ] Fase 6 — Deploy Devnet + QA end-to-end (bloqueada hasta terminar validación manual en localnet con Phantom)
 
-**Fase actual: 6_devnet_deploy — pendiente**
-**Tests acumulados: 43 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
+**Fase actual: 5.5 — cerrando frontend/backend en localnet antes de pasar a devnet**
+**Tests acumulados: 44 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
 **Adelanto respecto al cronograma: ~35 días**
 
 ---

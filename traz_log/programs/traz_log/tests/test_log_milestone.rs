@@ -25,6 +25,10 @@ fn equipment_pda(code: &[u8; 32], program_id: &Pubkey) -> Pubkey {
     Pubkey::find_program_address(&[b"equipment", code.as_ref()], program_id).0
 }
 
+fn log_entry_pda(code: &[u8; 32], entry_index: u64, program_id: &Pubkey) -> Pubkey {
+    Pubkey::find_program_address(&[b"log", code.as_ref(), &entry_index.to_le_bytes()], program_id).0
+}
+
 fn incident_pda(incident_id: u64, program_id: &Pubkey) -> Pubkey {
     Pubkey::find_program_address(&[b"incident", &incident_id.to_le_bytes()], program_id).0
 }
@@ -143,6 +147,7 @@ fn setup() -> (LiteSVM, Keypair, Keypair, Keypair, [u8; 32], Pubkey) {
             program_id,
             &traz_log::instruction::OpenFireIncident {
                 incident_id: 0,
+                description: "Test Incident".to_string(),
                 coordinates: "10.0,-84.0".to_string(),
                 risk_level: 2,
             }
@@ -190,6 +195,7 @@ fn log_milestone_ix(
     code: [u8; 32],
     program_id: Pubkey,
     condition: ReportedCondition,
+    log_count: u64,
 ) -> Instruction {
     Instruction::new_with_bytes(
         program_id,
@@ -204,6 +210,8 @@ fn log_milestone_ix(
             global_state: global_state_pda(&program_id),
             signer_personnel: personnel_pda(&operator_pubkey, &program_id),
             equipment: equipment_pda(&code, &program_id),
+            log_entry: log_entry_pda(&code, log_count, &program_id),
+            system_program: system_program::ID,
         }
         .to_account_metas(None),
     )
@@ -221,7 +229,7 @@ fn read_equipment(svm: &LiteSVM, code: &[u8; 32], program_id: &Pubkey) -> Equipm
 fn test_custodian_can_log_milestone() {
     let (mut svm, _admin, _sc, operator, code, program_id) = setup();
 
-    let ix = log_milestone_ix(operator.pubkey(), code, program_id, ReportedCondition::MinorDamage);
+    let ix = log_milestone_ix(operator.pubkey(), code, program_id, ReportedCondition::MinorDamage, 0);
     send_ix(&mut svm, &operator, ix);
 
     let e = read_equipment(&svm, &code, &program_id);
@@ -242,7 +250,7 @@ fn test_milestone_updates_reported_condition() {
     send_ix(
         &mut svm,
         &operator,
-        log_milestone_ix(operator.pubkey(), code, program_id, ReportedCondition::CriticalDamage),
+        log_milestone_ix(operator.pubkey(), code, program_id, ReportedCondition::CriticalDamage, 0),
     );
 
     assert_eq!(
@@ -281,7 +289,7 @@ fn test_non_custodian_cannot_log_milestone() {
         ),
     );
 
-    let ix = log_milestone_ix(intruder.pubkey(), code, program_id, ReportedCondition::MinorDamage);
+    let ix = log_milestone_ix(intruder.pubkey(), code, program_id, ReportedCondition::MinorDamage, 0);
     assert!(
         !try_send_ix(&mut svm, &intruder, ix),
         "non-custodian operator must not be able to log a milestone"
@@ -293,7 +301,7 @@ fn test_wrong_role_cannot_log_milestone() {
     let (mut svm, _admin, scene_commander, _operator, code, program_id) = setup();
 
     // scene_commander tiene rol SceneCommander, no Operator
-    let ix = log_milestone_ix(scene_commander.pubkey(), code, program_id, ReportedCondition::Lost);
+    let ix = log_milestone_ix(scene_commander.pubkey(), code, program_id, ReportedCondition::Lost, 0);
     assert!(
         !try_send_ix(&mut svm, &scene_commander, ix),
         "SceneCommander role must not be able to log a milestone"

@@ -143,6 +143,7 @@ fn setup() -> (LiteSVM, Keypair, Keypair, Keypair, [u8; 32], Pubkey) {
             program_id,
             &traz_log::instruction::OpenFireIncident {
                 incident_id: 0,
+                description: "Test Incident".to_string(),
                 coordinates: "10.0,-84.0".to_string(),
                 risk_level: 3,
             }
@@ -277,5 +278,150 @@ fn test_non_operator_role_cannot_be_assigned() {
     assert!(
         !try_send_ix(&mut svm, &sc, ix),
         "assigning equipment to non-Operator role must fail"
+    );
+}
+
+#[test]
+fn test_scene_commander_cannot_assign_to_incident_they_do_not_command() {
+    let (mut svm, admin, sc, operator, code, program_id) = setup();
+
+    // Segundo Jefe de Escena, dueño del incidente 1
+    let other_sc = Keypair::new();
+    svm.airdrop(&other_sc.pubkey(), 10_000_000_000).unwrap();
+    send_ix(
+        &mut svm,
+        &admin,
+        Instruction::new_with_bytes(
+            program_id,
+            &traz_log::instruction::RegisterPersonnel {
+                name: "Other Commander".to_string(),
+                specialty: "Test".to_string(),
+                role: Role::SceneCommander,
+            }
+            .data(),
+            traz_log::accounts::RegisterPersonnel {
+                signer: admin.pubkey(),
+                global_state: global_state_pda(&program_id),
+                new_personnel: personnel_pda(&other_sc.pubkey(), &program_id),
+                wallet: other_sc.pubkey(),
+                system_program: system_program::ID,
+            }
+            .to_account_metas(None),
+        ),
+    );
+    send_ix(
+        &mut svm,
+        &other_sc,
+        Instruction::new_with_bytes(
+            program_id,
+            &traz_log::instruction::OpenFireIncident {
+                incident_id: 1,
+                description: "Other Incident".to_string(),
+                coordinates: "11.0,-85.0".to_string(),
+                risk_level: 2,
+            }
+            .data(),
+            traz_log::accounts::OpenFireIncident {
+                signer: other_sc.pubkey(),
+                global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&other_sc.pubkey(), &program_id),
+                incident: incident_pda(1, &program_id),
+                system_program: system_program::ID,
+            }
+            .to_account_metas(None),
+        ),
+    );
+
+    // `sc` comanda el incidente 0, no el 1: no puede asignar equipo al incidente 1
+    let ix = assign_equipment_ix(sc.pubkey(), operator.pubkey(), code, 1, program_id);
+    assert!(
+        !try_send_ix(&mut svm, &sc, ix),
+        "assigning equipment to an incident commanded by someone else must fail"
+    );
+}
+
+#[test]
+fn test_operator_cannot_be_assigned_to_second_active_incident() {
+    let (mut svm, admin, sc, operator, code, program_id) = setup();
+
+    // Operador queda comprometido con el incidente 0
+    send_ix(&mut svm, &sc, assign_equipment_ix(sc.pubkey(), operator.pubkey(), code, 0, program_id));
+
+    // Segundo equipo, registrado por un OperationalBase nuevo
+    let op_base2 = Keypair::new();
+    svm.airdrop(&op_base2.pubkey(), 10_000_000_000).unwrap();
+    send_ix(
+        &mut svm,
+        &admin,
+        Instruction::new_with_bytes(
+            program_id,
+            &traz_log::instruction::RegisterPersonnel {
+                name: "OpsBase 2".to_string(),
+                specialty: "Test".to_string(),
+                role: Role::OperationalBase,
+            }
+            .data(),
+            traz_log::accounts::RegisterPersonnel {
+                signer: admin.pubkey(),
+                global_state: global_state_pda(&program_id),
+                new_personnel: personnel_pda(&op_base2.pubkey(), &program_id),
+                wallet: op_base2.pubkey(),
+                system_program: system_program::ID,
+            }
+            .to_account_metas(None),
+        ),
+    );
+    let code2 = to_code("PUMP-BETA");
+    send_ix(
+        &mut svm,
+        &op_base2,
+        Instruction::new_with_bytes(
+            program_id,
+            &traz_log::instruction::RegisterEquipment {
+                code: code2,
+                description: "Bomba beta".to_string(),
+                nominal_consumption: 800,
+            }
+            .data(),
+            traz_log::accounts::RegisterEquipment {
+                signer: op_base2.pubkey(),
+                global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&op_base2.pubkey(), &program_id),
+                equipment: equipment_pda(&code2, &program_id),
+                system_program: system_program::ID,
+            }
+            .to_account_metas(None),
+        ),
+    );
+
+    // Mismo Jefe de Escena abre un segundo incidente
+    send_ix(
+        &mut svm,
+        &sc,
+        Instruction::new_with_bytes(
+            program_id,
+            &traz_log::instruction::OpenFireIncident {
+                incident_id: 1,
+                description: "Second Incident".to_string(),
+                coordinates: "11.0,-85.0".to_string(),
+                risk_level: 2,
+            }
+            .data(),
+            traz_log::accounts::OpenFireIncident {
+                signer: sc.pubkey(),
+                global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&sc.pubkey(), &program_id),
+                incident: incident_pda(1, &program_id),
+                system_program: system_program::ID,
+            }
+            .to_account_metas(None),
+        ),
+    );
+
+    // El operador ya está comprometido con el incidente 0: no puede tomar equipo del incidente 1
+    let ix = assign_equipment_ix(sc.pubkey(), operator.pubkey(), code2, 1, program_id);
+    assert!(
+        !try_send_ix(&mut svm, &sc, ix),
+        "operator already committed to another active incident must not be re-assignable"
     );
 }

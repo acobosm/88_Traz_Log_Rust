@@ -103,6 +103,7 @@ fn open_incident_ix(
         program_id,
         &traz_log::instruction::OpenFireIncident {
             incident_id,
+            description: "Test Incident".to_string(),
             coordinates: coordinates.to_string(),
             risk_level,
         }
@@ -157,16 +158,16 @@ fn test_incident_account_fields_are_correct() {
 }
 
 #[test]
-fn test_incident_account_size_is_191_bytes() {
+fn test_incident_account_size_is_259_bytes() {
     let (mut svm, _admin, sc, program_id) = setup();
 
     send_ix(&mut svm, &sc, open_incident_ix(sc.pubkey(), 0, program_id, "0,0", 1));
 
     let pda = incident_pda(0, &program_id);
     let len = svm.get_account(&pda).unwrap().data.len();
-    // 8 discriminador + 8 incident_id + (4+128) coordinates + 1 risk_level
+    // 8 discriminador + 8 incident_id + (4+64) description + (4+128) coordinates + 1 risk_level
     // + 1 is_active + 8 opened_at + 32 commander + 1 bump
-    let expected = 8 + 8 + 132 + 1 + 1 + 8 + 32 + 1;
+    let expected = 8 + 8 + 68 + 132 + 1 + 1 + 8 + 32 + 1;
     assert_eq!(len, expected, "IncidentAccount size mismatch: got {len}, expected {expected}");
 }
 

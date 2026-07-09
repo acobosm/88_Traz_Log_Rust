@@ -11,14 +11,22 @@ pub fn handler(
 ) -> Result<()> {
     require!(!ctx.accounts.global_state.is_paused, TrazLogError::SystemPaused);
 
+    let incident_id = ctx.accounts.incident.incident_id;
+
+    let op = &mut ctx.accounts.operator_personnel;
+    match op.current_incident {
+        Some(existing) => require!(existing == incident_id, TrazLogError::OperatorAlreadyAssigned),
+        None => op.current_incident = Some(incident_id),
+    }
+    op.active_assignments += 1;
+
     let clock = Clock::get()?;
     let e = &mut ctx.accounts.equipment;
     e.status = EquipmentStatus::InUse;
     e.custodian = ctx.accounts.operator_wallet.key();
-    e.incident_id = ctx.accounts.incident.incident_id;
+    e.incident_id = incident_id;
     e.use_start_time = clock.unix_timestamp;
 
-    let incident_id = e.incident_id;
     let operator = e.custodian;
 
     emit!(EquipmentAssigned { incident_id, equipment_code, operator });
@@ -53,10 +61,12 @@ pub struct AssignEquipment<'info> {
         seeds = [SEED_INCIDENT, &incident_id.to_le_bytes()],
         bump = incident.bump,
         constraint = incident.is_active @ TrazLogError::IncidentNotActive,
+        constraint = incident.commander == signer.key() @ TrazLogError::NotIncidentCommander,
     )]
     pub incident: Account<'info, IncidentAccount>,
 
     #[account(
+        mut,
         seeds = [SEED_PERSONNEL, operator_wallet.key().as_ref()],
         bump = operator_personnel.bump,
         constraint = operator_personnel.role == Role::Operator @ TrazLogError::InvalidOperatorRole,

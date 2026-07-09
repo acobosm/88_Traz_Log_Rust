@@ -145,7 +145,7 @@ fn test_personnel_account_fields_are_correct() {
 }
 
 #[test]
-fn test_personnel_account_size_is_179_bytes() {
+fn test_personnel_account_size_is_189_bytes() {
     let (mut svm, admin, program_id) = setup();
     let member = Keypair::new();
     svm.airdrop(&member.pubkey(), 1_000_000_000).unwrap();
@@ -165,8 +165,9 @@ fn test_personnel_account_size_is_179_bytes() {
 
     let pda = personnel_pda(&member.pubkey(), &program_id);
     let len = svm.get_account(&pda).unwrap().data.len();
-    // 8 discriminador + 32 wallet + (4+64) name + (4+64) specialty + 1 is_active + 1 role + 1 bump
-    let expected = 8 + 32 + 68 + 68 + 1 + 1 + 1;
+    // 8 discriminador + 32 wallet + (4+64) name + (4+64) specialty + 1 is_active + 1 role
+    // + (1+8) current_incident + 1 active_assignments + 1 bump
+    let expected = 8 + 32 + 68 + 68 + 1 + 1 + 9 + 1 + 1;
     assert_eq!(
         len, expected,
         "PersonnelAccount size mismatch: got {len}, expected {expected}"

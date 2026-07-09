@@ -26,4 +26,8 @@ pub enum TrazLogError {
     InvalidRiskLevel,
     #[msg("Provided incident ID does not match current counter")]
     InvalidIncidentId,
+    #[msg("Operator is already assigned to a different active incident")]
+    OperatorAlreadyAssigned,
+    #[msg("Only the commander who opened this incident can assign equipment to it")]
+    NotIncidentCommander,
 }

@@ -84,7 +84,7 @@ fn setup() -> (LiteSVM, Keypair, Keypair, Keypair, Pubkey) {
     send_ix(&mut svm, &scene_commander, Instruction::new_with_bytes(
         program_id,
         &traz_log::instruction::OpenFireIncident {
-            incident_id: 0, coordinates: "9.934,-84.082".to_string(), risk_level: 5,
+            incident_id: 0, description: "Test Incident".to_string(), coordinates: "9.934,-84.082".to_string(), risk_level: 5,
         }.data(),
         traz_log::accounts::OpenFireIncident {
             signer: scene_commander.pubkey(),

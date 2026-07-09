@@ -178,7 +178,7 @@ fn test_equipment_account_fields_are_correct() {
 }
 
 #[test]
-fn test_equipment_account_size_is_231_bytes() {
+fn test_equipment_account_size_is_239_bytes() {
     let (mut svm, _admin, op_base, program_id) = setup();
     let code = to_code("SIZE-TEST");
 
@@ -191,8 +191,8 @@ fn test_equipment_account_size_is_231_bytes() {
     let pda = equipment_pda(&code, &program_id);
     let len = svm.get_account(&pda).unwrap().data.len();
     // 8 discriminador + 32 code + (4+128) description + 8 nominal_consumption
-    // + 1 status + 1 reported_condition + 32 custodian + 8 incident_id + 8 use_start_time + 1 bump
-    let expected = 8 + 32 + 132 + 8 + 1 + 1 + 32 + 8 + 8 + 1;
+    // + 1 status + 1 reported_condition + 32 custodian + 8 incident_id + 8 use_start_time + 8 log_count + 1 bump
+    let expected = 8 + 32 + 132 + 8 + 1 + 1 + 32 + 8 + 8 + 8 + 1;
     assert_eq!(
         len, expected,
         "EquipmentAccount size mismatch: got {len}, expected {expected}"

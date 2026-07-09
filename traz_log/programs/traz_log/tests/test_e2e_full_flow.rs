@@ -16,7 +16,7 @@ use {
     solana_transaction::versioned::VersionedTransaction,
     traz_log::{
         EquipmentStatus, GlobalState, IncidentAccount, EquipmentAccount,
-        ReportedCondition, Role,
+        LogEntry, ReportedCondition, Role,
     },
 };
 
@@ -33,6 +33,9 @@ fn equipment_pda(c: &[u8; 32], p: &Pubkey) -> Pubkey {
 }
 fn incident_pda(id: u64, p: &Pubkey) -> Pubkey {
     Pubkey::find_program_address(&[b"incident", &id.to_le_bytes()], p).0
+}
+fn log_entry_pda(code: &[u8; 32], entry_index: u64, p: &Pubkey) -> Pubkey {
+    Pubkey::find_program_address(&[b"log", code.as_ref(), &entry_index.to_le_bytes()], p).0
 }
 
 fn to_code(s: &str) -> [u8; 32] {
@@ -150,6 +153,7 @@ fn test_complete_firefighting_incident_lifecycle() {
         program_id,
         &traz_log::instruction::OpenFireIncident {
             incident_id: 0,
+            description: "Test Incident".to_string(),
             coordinates: "9.9281,-84.0907".to_string(),
             risk_level: 4,
         }.data(),
@@ -191,6 +195,7 @@ fn test_complete_firefighting_incident_lifecycle() {
     assert_eq!(eq.incident_id, 0);
 
     // ── Paso 6: Operador reporta condición del equipo ────────────────────────
+    // log_count es 0 — primer reporte para este equipo
     send(&mut svm, &operator, Instruction::new_with_bytes(
         program_id,
         &traz_log::instruction::LogMilestone {
@@ -203,14 +208,22 @@ fn test_complete_firefighting_incident_lifecycle() {
             global_state: global_state_pda(&program_id),
             signer_personnel: personnel_pda(&operator.pubkey(), &program_id),
             equipment: equipment_pda(&code, &program_id),
+            log_entry: log_entry_pda(&code, 0, &program_id),
+            system_program: system_program::ID,
         }.to_account_metas(None),
     ));
 
-    assert_eq!(
-        read_eq(&svm, &code, &program_id).reported_condition,
-        ReportedCondition::MinorDamage,
-        "condición reportada debe ser MinorDamage"
-    );
+    let eq_after_log = read_eq(&svm, &code, &program_id);
+    assert_eq!(eq_after_log.reported_condition, ReportedCondition::MinorDamage, "condición reportada debe ser MinorDamage");
+    assert_eq!(eq_after_log.log_count, 1, "log_count debe ser 1 tras primer reporte");
+
+    // Verificar que la LogEntry fue creada con los datos correctos
+    let log_acc = svm.get_account(&log_entry_pda(&code, 0, &program_id)).unwrap();
+    let mut log_data: &[u8] = &log_acc.data;
+    let entry = LogEntry::try_deserialize(&mut log_data).unwrap();
+    assert_eq!(entry.entry_index, 0);
+    assert_eq!(entry.condition, ReportedCondition::MinorDamage);
+    assert_eq!(entry.operator, operator.pubkey());
 
     // ── Paso 7: Comandante cierra el incidente ───────────────────────────────
     // Diseño lazy-close: el incidente se cierra aunque el equipo siga en campo

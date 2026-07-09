@@ -13,6 +13,12 @@ pub fn handler(
         TrazLogError::EquipmentNotInUse
     );
     ctx.accounts.equipment.status = EquipmentStatus::Returning;
+
+    let op = &mut ctx.accounts.signer_personnel;
+    op.active_assignments = op.active_assignments.saturating_sub(1);
+    if op.active_assignments == 0 {
+        op.current_incident = None;
+    }
     Ok(())
 }
 
@@ -25,6 +31,7 @@ pub struct InitiateReturn<'info> {
     pub global_state: Account<'info, GlobalState>,
 
     #[account(
+        mut,
         seeds = [SEED_PERSONNEL, signer.key().as_ref()],
         bump = signer_personnel.bump,
         constraint = signer_personnel.role == Role::Operator @ TrazLogError::Unauthorized,

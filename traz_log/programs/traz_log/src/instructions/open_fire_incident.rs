@@ -7,6 +7,7 @@ use crate::events::IncidentOpened;
 pub fn handler(
     ctx: Context<OpenFireIncident>,
     incident_id: u64,
+    description: String,
     coordinates: String,
     risk_level: u8,
 ) -> Result<()> {
@@ -20,6 +21,7 @@ pub fn handler(
     let clock = Clock::get()?;
     let incident = &mut ctx.accounts.incident;
     incident.incident_id = incident_id;
+    incident.description = description;
     incident.coordinates = coordinates;
     incident.risk_level = risk_level;
     incident.is_active = true;

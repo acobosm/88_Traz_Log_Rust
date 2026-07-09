@@ -52,10 +52,11 @@ pub mod traz_log {
     pub fn open_fire_incident(
         ctx: Context<OpenFireIncident>,
         incident_id: u64,
+        description: String,
         coordinates: String,
         risk_level: u8,
     ) -> Result<()> {
-        open_fire_incident::handler(ctx, incident_id, coordinates, risk_level)
+        open_fire_incident::handler(ctx, incident_id, description, coordinates, risk_level)
     }
 
     /// Assigns equipment to an operator within an active incident. SceneCommander only.

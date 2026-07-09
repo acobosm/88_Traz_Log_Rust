@@ -21,6 +21,8 @@ pub struct PersonnelAccount {
     pub specialty: String,
     pub is_active: bool,
     pub role: Role,
+    pub current_incident: Option<u64>,  // Some(id) mientras tenga equipo asignado en ese incidente
+    pub active_assignments: u8,         // equipos InUse a su cargo; current_incident se limpia al llegar a 0
     pub bump: u8,
 }
 
@@ -36,6 +38,7 @@ pub struct EquipmentAccount {
     pub custodian: Pubkey,
     pub incident_id: u64,
     pub use_start_time: i64,       // unix timestamp
+    pub log_count: u64,            // número de LogEntry creados para este equipo
     pub bump: u8,
 }
 
@@ -43,12 +46,27 @@ pub struct EquipmentAccount {
 #[derive(InitSpace)]
 pub struct IncidentAccount {
     pub incident_id: u64,
+    #[max_len(64)]
+    pub description: String,
     #[max_len(128)]
     pub coordinates: String,
     pub risk_level: u8,            // 1–5
     pub is_active: bool,
     pub opened_at: i64,            // unix timestamp
     pub commander: Pubkey,
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct LogEntry {
+    pub equipment_code: [u8; 32],
+    #[max_len(256)]
+    pub notes: String,
+    pub condition: ReportedCondition,
+    pub operator: Pubkey,
+    pub timestamp: i64,
+    pub entry_index: u64,
     pub bump: u8,
 }
 

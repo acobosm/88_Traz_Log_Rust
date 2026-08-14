@@ -85,6 +85,11 @@ npm install
 
 ## Ejecutar el proyecto en local (localnet)
 
+Anchor CLI 1.0.2 usa **Surfpool** como validador local por defecto (no el
+`solana-test-validator` clásico) para `anchor test` y `anchor localnet`. Surfpool
+incluye **Studio**, una interfaz web para ver las transacciones en tiempo real, en
+`http://127.0.0.1:18488`.
+
 ### Opción A — Todo en un comando (recomendado)
 
 ```bash
@@ -92,18 +97,21 @@ cd traz_log
 anchor test
 ```
 
-Anchor levanta un validador local, despliega el programa, ejecuta todos los tests TypeScript y apaga el validador al terminar.
+Anchor levanta Surfpool, despliega el programa, ejecuta todos los tests TypeScript y apaga el validador al terminar. Usa `anchor test --detach` si quieres que el validador (y el Studio) sigan corriendo después de los tests, para seguir explorando el estado a mano.
 
 ### Opción B — Validador separado (útil para explorar el estado)
 
 ```bash
-# Terminal 1: levantar validador local
-solana-test-validator --reset
-
-# Terminal 2: desplegar y correr tests
+# Terminal 1: levantar validador + build + deploy, y dejarlo corriendo
 cd traz_log
-anchor test --skip-local-validator
+anchor test --detach
+
+# Terminal 2: frontend u otros comandos
 ```
+
+Abre `http://127.0.0.1:18488` para ver el Studio con las transacciones en vivo.
+
+Si por algún motivo necesitas el `solana-test-validator` clásico en vez de Surfpool, usa `--validator legacy` en `anchor test` o `anchor localnet`.
 
 Resultado esperado: todos los tests en verde con `passing`.
 
@@ -249,10 +257,11 @@ rustup update stable
 rustup override set stable
 ```
 
-**`solana-test-validator` no inicia:**
+**Surfpool / validador local no inicia:**
 ```bash
-solana-test-validator --reset --quiet
+anchor test --detach --validator legacy   # fuerza solana-test-validator clásico
 ```
+Si el puerto `18488` (Studio) o `8899`/`8900` ya están en uso por una corrida previa que quedó colgada (ej. apagón abrupto), mata el proceso residual antes de reintentar.
 
 **Error `Program failed to deploy` en devnet:**
 Verificar saldo: `solana balance --url devnet`  

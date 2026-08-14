@@ -14,6 +14,7 @@ Sistema de trazabilidad logística para operaciones de combate de incendios fore
 ## Stack
 - Anchor CLI 1.0.2
 - Solana CLI 3.1.10 (Agave)
+- Validador local: **Surfpool** (default de Anchor 1.0.2 para `anchor test`/`anchor localnet`, flag `--validator surfpool|legacy`). Studio en `http://127.0.0.1:18488` para ver transacciones en tiempo real. `legacy` cae a `solana-test-validator` clásico.
 - Tests: Rust + LiteSVM 0.10 (Anchor 1.0 no usa TypeScript para tests)
 - Frontend: Vue.js + `@solana/wallet-adapter-vue` + Phantom
 - Red objetivo: Solana Devnet

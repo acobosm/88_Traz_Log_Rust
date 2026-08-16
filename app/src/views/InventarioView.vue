@@ -73,12 +73,13 @@
       <div v-else class="table-wrap">
         <table>
           <thead>
-            <tr><th>ID</th><th>Coordenadas</th><th>Riesgo</th><th>Estado</th><th>Comandante</th></tr>
+            <tr><th>ID</th><th>Descripción</th><th>Coordenadas</th><th>Riesgo</th><th>Estado</th><th>Comandante</th></tr>
           </thead>
           <tbody>
             <tr v-for="i in incidentsSorted" :key="i.publicKey.toBase58()">
               <td>#{{ i.account.incidentId.toString() }}</td>
-              <td>{{ i.account.coordinates }}</td>
+              <td>{{ i.account.description }}</td>
+              <td class="mono">{{ shortCoords(i.account.coordinates) }}</td>
               <td>
                 <span class="risk-badge" :data-level="i.account.riskLevel">
                   {{ i.account.riskLevel }}/5

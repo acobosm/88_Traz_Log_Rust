@@ -102,6 +102,7 @@ fn setup() -> (LiteSVM, Keypair, Keypair, Keypair, [u8; 32], Pubkey) {
                 traz_log::accounts::RegisterPersonnel {
                     signer: admin.pubkey(),
                     global_state: global_state_pda(&program_id),
+                    signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                     new_personnel: personnel_pda(&wallet, &program_id),
                     wallet,
                     system_program: system_program::ID,
@@ -266,6 +267,7 @@ fn test_non_operator_role_cannot_be_assigned() {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&bad_assignee.pubkey(), &program_id),
                 wallet: bad_assignee.pubkey(),
                 system_program: system_program::ID,
@@ -302,6 +304,7 @@ fn test_scene_commander_cannot_assign_to_incident_they_do_not_command() {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&other_sc.pubkey(), &program_id),
                 wallet: other_sc.pubkey(),
                 system_program: system_program::ID,
@@ -364,6 +367,7 @@ fn test_operator_cannot_be_assigned_to_second_active_incident() {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&op_base2.pubkey(), &program_id),
                 wallet: op_base2.pubkey(),
                 system_program: system_program::ID,

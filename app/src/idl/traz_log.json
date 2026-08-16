@@ -826,6 +826,35 @@
           }
         },
         {
+          "name": "signer_personnel",
+          "docs": [
+            "calling without their own PersonnelAccount) — checked manually in the",
+            "handler to allow Admin OR an active OperationalBase to register personnel."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  101,
+                  114,
+                  115,
+                  111,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
           "name": "new_personnel",
           "writable": true,
           "pda": {

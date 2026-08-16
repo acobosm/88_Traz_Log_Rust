@@ -116,6 +116,7 @@ fn test_complete_firefighting_incident_lifecycle() {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&wallet, &program_id),
                 wallet,
                 system_program: system_program::ID,

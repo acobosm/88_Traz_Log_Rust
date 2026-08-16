@@ -15,7 +15,7 @@
           Selecciona incidente
           <select v-model.number="selectedIncidentId">
             <option v-for="i in activeIncidents" :key="i.publicKey.toBase58()" :value="Number(i.account.incidentId.toString())">
-              #{{ i.account.incidentId.toString() }} — {{ i.account.coordinates }} · Riesgo {{ i.account.riskLevel }}/5
+              #{{ i.account.incidentId.toString() }} — {{ i.account.description }} · {{ i.account.coordinates }} · Riesgo {{ i.account.riskLevel }}/5
             </option>
           </select>
         </label>
@@ -86,7 +86,7 @@
         <label>Incidente
           <select v-model.number="assign.incidentId" required>
             <option v-for="i in activeIncidents" :key="i.publicKey.toBase58()" :value="Number(i.account.incidentId.toString())">
-              #{{ i.account.incidentId.toString() }} — {{ i.account.coordinates }}
+              #{{ i.account.incidentId.toString() }} — {{ i.account.description }} · {{ i.account.coordinates }}
             </option>
           </select>
         </label>
@@ -147,7 +147,7 @@
         <label>Incidente
           <select v-model.number="close.incidentId" required>
             <option v-for="i in activeIncidents" :key="i.publicKey.toBase58()" :value="Number(i.account.incidentId.toString())">
-              #{{ i.account.incidentId.toString() }} — {{ i.account.coordinates }}
+              #{{ i.account.incidentId.toString() }} — {{ i.account.description }} · {{ i.account.coordinates }}
             </option>
           </select>
         </label>

@@ -778,14 +778,14 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-**Resumen acumulado:** 44 tests pasados, 0 fallidos.
+**Resumen acumulado (actualizado 2026-08-15):** 45 tests pasados, 0 fallidos.
 
 | Suite | Tests | Archivo |
 |---|---|---|
 | Unittests lib | 1 | `src/lib.rs` (generado por Anchor) |
 | Fase 0 — Initialize | 2 | `tests/test_initialize.rs` |
 | Fase 1 — Account Architecture | 5 | `tests/test_toggle_pause.rs` |
-| Fase 2 — Register Personnel | 5 | `tests/test_register_personnel.rs` |
+| Fase 2 — Register Personnel (+ 1 test de regresión, Fase 5.5) | 6 | `tests/test_register_personnel.rs` |
 | Fase 2 — Register Equipment | 5 | `tests/test_register_equipment.rs` |
 | Fase 3 — Open Fire Incident | 6 | `tests/test_open_fire_incident.rs` |
 | Fase 3 — Assign Equipment (+ 2 tests guardrails Fase 5) | 7 | `tests/test_assign_equipment.rs` |
@@ -794,6 +794,11 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 | Fase 4 — Close Incident | 4 | `tests/test_close_incident.rs` |
 | Fase 4 — E2E Full Flow | 1 | `tests/test_e2e_full_flow.rs` |
 | Fase 5 (adelanto) — Log Entry / bitácora on-chain | 4 | `tests/test_log_entry.rs` |
+
+> **Actualización 2026-08-15:** se agregó `test_operational_base_can_register_personnel`
+> como test de regresión del fix descrito en la sección 9.3 y en la sección 11. Detalle
+> completo del cambio de accounts (`signer_personnel`) y de los 8 archivos de fixtures
+> de test que tuvieron que actualizarse en la sección 11.2.
 
 > **Sobre la warning:** El re-export glob genera un warning porque la función `handler` tiene el mismo nombre en todos los módulos. Es inofensiva — las instrucciones se invocan siempre por path completo en `lib.rs` (`register_personnel::handler(ctx, ...)`), eliminando toda ambigüedad en runtime.
 
@@ -828,8 +833,21 @@ Cada PDA almacena su `bump: u8` en el momento de creación (desde `ctx.bumps.acc
 ### 9.2 `incident_id` como parámetro de instrucción
 El cliente lee `GlobalState.next_incident_id`, lo pasa como primer argumento de `open_fire_incident`, y Anchor lo usa en el `#[instruction(incident_id)]` para derivar el PDA del incidente. El programa verifica que `incident_id == global_state.next_incident_id`. Esto permite al cliente construir la transacción completa (con la dirección PDA pre-calculada) antes de enviarla.
 
-### 9.3 `register_personnel` admin-only en Fase 0
-La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BASE_OPERATIVA_ROLE`. En Anchor, manejar una cuenta opcional (`Option<Account<'info, T>>`) añade complejidad innecesaria en Fase 0. Solución: admin-only en esta fase. La ruta `OperationalBase` se añade en Fase 3 sin cambiar la interfaz pública del programa.
+### 9.3 `register_personnel`: de admin-only a Admin OR OperationalBase (corregido en Fase 5.5)
+La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BASE_OPERATIVA_ROLE`. En la migración a Anchor se implementó `register_personnel` como admin-only en Fase 0, con la intención documentada de añadir la ruta `OperationalBase` en una fase posterior — pero esa segunda parte quedó pendiente en el código sin que ninguna prueba automatizada lo detectara (las suites de Fase 0-4 solo ejercitaban el camino Admin).
+
+**Encontrado en QA manual (2026-08-15, ver sección 11):** durante el libreto `simulacion_01.md`, Marta (rol `OperationalBase`) intentó registrar personal desde Phantom y recibió `AnchorError Unauthorized (6000)`, contradiciendo la tabla de roles documentada en `CLAUDE.md`. El `constraint` en `register_personnel.rs` comparaba únicamente `global_state.admin == signer.key()`.
+
+**Fix aplicado:** se evitó `Option<Account<'info, T>>` (no hay precedente de ese patrón en el resto del programa) a favor de una cuenta `UncheckedAccount<'info>` con PDA derivado por seeds (`signer_personnel`, seeds `["personnel", signer]`), que puede o no estar inicializada — el Admin no necesariamente tiene su propia `PersonnelAccount`. La autorización se resolvió de forma imperativa en el handler:
+
+```rust
+let is_admin = ctx.accounts.global_state.admin == ctx.accounts.signer.key();
+let is_operational_base = /* deserializa signer_personnel solo si existe y es del programa */
+    acc.role == Role::OperationalBase && acc.is_active;
+require!(is_admin || is_operational_base, TrazLogError::Unauthorized);
+```
+
+Este patrón (cuenta `UncheckedAccount` + deserialización manual condicionada a "existe / no existe") es reutilizable para cualquier instrucción futura que necesite aceptar más de un rol sin forzar que todos los roles tengan cuentas `PersonnelAccount` pre-existentes garantizadas.
 
 ---
 
@@ -843,7 +861,8 @@ La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BA
 | **3** | `3_incident_management` | **Completada** | 15 tests: IncidentAccount (tamaño, campos, contador), asignación de equipo, restricciones de rol y custodio en log_milestone |
 | **4** | `4_return_and_close` | **Completada** | 10 tests: retorno de equipo (custodia, doble retorno, roles), cierre de incidente (lazy-close, idempotencia, roles); 1 test E2E del ciclo completo de 8 pasos |
 | **5** | `5_phantom_frontend` | **Completada** | Vue 3 + Vite + Phantom: `useWallet`, `useProgram`, 5 vistas, 9 instrucciones conectadas, panel de incidente, modal de bitácora, build sin errores. Incluye guardrails de `NotIncidentCommander`/`OperatorAlreadyAssigned` y adelanto de `LogEntry` (bitácora on-chain) |
-| 6 | `6_devnet_deploy` | Pendiente — bloqueada hasta validar todo el flujo en localnet | Deploy a Solana Devnet + QA end-to-end con Phantom real |
+| **5.5** | `5_phantom_frontend` (continuación) | **En curso** | QA manual completo con Phantom real (libreto `simulacion_01.md`, 13 fases) — ver sección 11. 1 bug de lógica encontrado y corregido (`register_personnel`/`OperationalBase`), varias mejoras de UI identificadas y en resolución |
+| 6 | `6_devnet_deploy` | Pendiente — bloqueada hasta cerrar Fase 5.5 | Deploy a Solana Devnet + QA end-to-end con Phantom real |
 | ~~*(opt)*~~ | ~~`7_onchain_log`~~ | **Absorbida en Fase 5** | `LogEntry` PDAs, bitácora histórica queryable — implementada antes de lo planeado, no requiere rama propia |
 
 ### Remotos Git configurados
@@ -852,6 +871,58 @@ La instrucción original `registrarPersonal` aceptaba `DEFAULT_ADMIN_ROLE` o `BA
 |---|---|---|
 | `ghp` | `https://github.com/acobosm/88_Traz_Log_Rust.git` | Push continuo durante desarrollo |
 | `glp` | `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git` | Push continuo durante desarrollo |
-| `gla` | *(pendiente — academia)* | Solo desde el 3 de agosto de 2026, push incremental para simular 30 días de desarrollo |
+| `gla` | `https://gitlab.codecrypto.academy/andres.cobos/88_traz_log_rust.git` | Configurado 2026-08-14. Push incremental por rama para simular ~30 días de desarrollo (calendario interno, no publicado en este documento) |
+
+---
+
+## 11. QA Manual — Simulación 01 (Fase 5.5)
+
+### 11.1 Metodología
+
+Los tests automatizados de las secciones 5–7 verifican la lógica del programa en aislamiento (LiteSVM, en memoria, sin frontend ni wallet real). Para cerrar la Fase 5 se diseñó y ejecutó adicionalmente un **libreto de QA manual** (`simulacion_01.md`, en la raíz del repo) que ejercita el sistema completo — Surfpool como validador local, frontend Vue real en `localhost:5173`, firma real vía Phantom — con una narrativa de 13 fases y 5 personajes (Sofía Ramírez, Andrés Paredes, Marta Chávez, Diego Salazar, Valeria Núñez) más el Admin, cubriendo un día completo de operación con 3 incidentes forestales simultáneos/consecutivos.
+
+El libreto incluye deliberadamente pasos marcados ⛔ (deben fallar) para confirmar que los guardrails de seguridad rechazan operaciones inválidas, no solo que el camino feliz funciona.
+
+### 11.2 Resultados
+
+Ejecutado el 2026-08-14/15. Las 13 fases se completaron sin desviaciones del resultado esperado. Checklist final del libreto:
+
+| Verificación | Resultado |
+|---|---|
+| Guardrail `NotIncidentCommander` disparado y corregido | ✅ (`AnchorError` 6013) |
+| Guardrail `OperatorAlreadyAssigned` disparado y corregido | ✅ (`AnchorError` 6012) |
+| Un operador con varios equipos bajo el mismo incidente | ✅ |
+| Bitácora `LogEntry` con condición Operacional / Daño menor / Daño crítico | ✅ (3/3 condiciones) |
+| Equipo sin bitácora reportada, retornado sin bloquear el flujo | ✅ |
+| `IncidentAlreadyClosed` por doble cierre | ⚠️ No reproducible vía UI (el selector de "Cerrar incidente" solo lista incidentes activos, por una mejora de UX pedida en desarrollo) — cubierto en su lugar por `test_cannot_close_already_closed_incident` (automatizado) |
+| Operador liberado (`initiate_return` hasta 0 asignaciones) reasignado a incidente nuevo | ✅ |
+| 3 incidentes abiertos y cerrados, sin reciclar equipo en estado `Returning` | ✅ |
+| Panel de incidente y modal de bitácora reflejan datos reales on-chain | ✅ |
+
+11 de 12 ítems verificados directamente en vivo; el restante queda cubierto por la suite automatizada.
+
+### 11.3 Hallazgos y correcciones
+
+| # | Hallazgo | Tipo | Estado |
+|---|---|---|---|
+| 1 | `register_personnel` rechazaba a `OperationalBase` pese a estar documentado como rol válido | Bug de lógica (Rust) | **Resuelto 2026-08-15** — ver sección 9.3 |
+| 2 | Faltaba mostrar la descripción del incidente en la tabla de Inventario y en los selectores de la vista Incidente | UI | **Resuelto 2026-08-15** |
+| 3 | Vista "Consultar estado de equipo": falta combobox de selección, colores de estado/condición, nombre de operador, descripción de incidente, y la nota del reporte no se muestra | UI | Pendiente |
+| 4 | Dashboard sin sección específica por rol conectado (ej. equipos bajo custodia de un `Operator`) | Feature nueva | Pendiente |
+| 5 | Botón "Bitácora" solo accesible desde incidentes activos; falta también en la tabla de Inventario, y falta exportar a PDF | UI | Pendiente |
+
+El hallazgo #1 es el único de severidad funcional (los demás son de experiencia de usuario); su resolución completa —causa raíz, fix, y test de regresión— está documentada en la sección 9.3.
+
+### 11.4 Nota operativa: extensión de espacio de programa upgradeable
+
+Al redesplegar el fix de la sección 9.3, `anchor deploy` falló con `ProgramData account not large enough`: en Solana, la cuenta `ProgramData` de un programa con `BPFLoaderUpgradeable` reserva un tamaño fijo en el primer deploy, y no crece automáticamente cuando el binario compilado aumenta de tamaño. Se resolvió con:
+
+```bash
+solana program extend <program-id> <bytes-adicionales> --url http://localhost:8899
+```
+
+Este comando amplía el espacio reservado (pagado como rent-exempt adicional por la autoridad de upgrade) sin cambiar el Program ID — la alternativa histórica, antes de que este comando existiera, era desplegar bajo una dirección nueva, rompiendo toda referencia externa al programa. Se extendió con margen (+100.000 bytes) para no repetir este paso en cada ajuste menor durante el resto de la Fase 5.5.
+
+---
 
 > Este informe se actualiza al completar cada fase. Los resultados de `cargo test` en la Sección 7 se reemplazan con el output de la fase más reciente.

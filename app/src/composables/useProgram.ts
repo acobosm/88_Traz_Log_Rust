@@ -128,9 +128,16 @@ export function useProgram() {
 
   async function registerPersonnel(wallet: PublicKey, name: string, specialty: string, role: object) {
     if (!program.value) throw new Error('No conectado')
+    const { publicKey: pk } = useWallet()
+    if (!pk.value) throw new Error('Sin wallet')
     return (program.value.methods as any)
       .registerPersonnel(name, specialty, role)
-      .accounts({ globalState: globalStatePda(), newPersonnel: personnelPda(wallet), wallet })
+      .accounts({
+        globalState: globalStatePda(),
+        signerPersonnel: personnelPda(pk.value),
+        newPersonnel: personnelPda(wallet),
+        wallet,
+      })
       .rpc()
   }
 

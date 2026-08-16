@@ -87,6 +87,7 @@ fn setup() -> (LiteSVM, Keypair, Keypair, Keypair, [u8; 32], Pubkey) {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&wallet, &program_id),
                 wallet,
                 system_program: system_program::ID,
@@ -219,6 +220,7 @@ fn test_non_custodian_cannot_initiate_return() {
         traz_log::accounts::RegisterPersonnel {
             signer: admin.pubkey(),
             global_state: global_state_pda(&program_id),
+            signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
             new_personnel: personnel_pda(&intruder.pubkey(), &program_id),
             wallet: intruder.pubkey(),
             system_program: system_program::ID,

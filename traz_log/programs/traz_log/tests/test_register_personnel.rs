@@ -48,7 +48,7 @@ fn setup() -> (LiteSVM, Keypair, Pubkey) {
 }
 
 fn register_personnel_ix(
-    admin_pubkey: Pubkey,
+    signer_pubkey: Pubkey,
     wallet: Pubkey,
     program_id: Pubkey,
     name: &str,
@@ -64,8 +64,9 @@ fn register_personnel_ix(
         }
         .data(),
         traz_log::accounts::RegisterPersonnel {
-            signer: admin_pubkey,
+            signer: signer_pubkey,
             global_state: global_state_pda(&program_id),
+            signer_personnel: personnel_pda(&signer_pubkey, &program_id),
             new_personnel: personnel_pda(&wallet, &program_id),
             wallet,
             system_program: system_program::ID,
@@ -172,6 +173,45 @@ fn test_personnel_account_size_is_189_bytes() {
         len, expected,
         "PersonnelAccount size mismatch: got {len}, expected {expected}"
     );
+}
+
+#[test]
+fn test_operational_base_can_register_personnel() {
+    let (mut svm, admin, program_id) = setup();
+
+    // Admin registra primero a Marta como OperationalBase
+    let base_op = Keypair::new();
+    svm.airdrop(&base_op.pubkey(), 10_000_000_000).unwrap();
+    send_ix(
+        &mut svm,
+        &admin,
+        register_personnel_ix(
+            admin.pubkey(),
+            base_op.pubkey(),
+            program_id,
+            "Marta Chavez",
+            "Base Operativa",
+            Role::OperationalBase,
+        ),
+    );
+
+    // Marta (OperationalBase), no Admin, registra a un tercero
+    let member = Keypair::new();
+    let ix = register_personnel_ix(
+        base_op.pubkey(),
+        member.pubkey(),
+        program_id,
+        "Diego Salazar",
+        "Rescate",
+        Role::Operator,
+    );
+    assert!(
+        try_send_ix(&mut svm, &base_op, ix),
+        "an active OperationalBase must be able to register personnel"
+    );
+
+    let p = read_personnel(&svm, &member.pubkey(), &program_id);
+    assert_eq!(p.role, Role::Operator, "role mismatch for member registered by OperationalBase");
 }
 
 #[test]

@@ -4,7 +4,6 @@ use crate::state::{GlobalState, PersonnelAccount, Role};
 use crate::error::TrazLogError;
 use crate::events::PersonnelRegistered;
 
-// Phase 0: admin-only. Phase 3 will add OperationalBase path.
 pub fn handler(
     ctx: Context<RegisterPersonnel>,
     name: String,
@@ -12,6 +11,21 @@ pub fn handler(
     role: Role,
 ) -> Result<()> {
     require!(!ctx.accounts.global_state.is_paused, TrazLogError::SystemPaused);
+
+    let is_admin = ctx.accounts.global_state.admin == ctx.accounts.signer.key();
+    let is_operational_base = {
+        let info = ctx.accounts.signer_personnel.to_account_info();
+        if info.owner == ctx.program_id {
+            let data = info.try_borrow_data()?;
+            data.len() > 8
+                && PersonnelAccount::try_deserialize(&mut &data[..])
+                    .map(|acc| acc.role == Role::OperationalBase && acc.is_active)
+                    .unwrap_or(false)
+        } else {
+            false
+        }
+    };
+    require!(is_admin || is_operational_base, TrazLogError::Unauthorized);
 
     let p = &mut ctx.accounts.new_personnel;
     p.wallet = ctx.accounts.wallet.key();
@@ -33,9 +47,14 @@ pub struct RegisterPersonnel<'info> {
     #[account(
         seeds = [SEED_GLOBAL],
         bump = global_state.bump,
-        constraint = global_state.admin == signer.key() @ TrazLogError::Unauthorized,
     )]
     pub global_state: Account<'info, GlobalState>,
+
+    /// CHECK: PDA derivation verified via seeds. May be uninitialized (Admin
+    /// calling without their own PersonnelAccount) — checked manually in the
+    /// handler to allow Admin OR an active OperationalBase to register personnel.
+    #[account(seeds = [SEED_PERSONNEL, signer.key().as_ref()], bump)]
+    pub signer_personnel: UncheckedAccount<'info>,
 
     #[account(
         init,

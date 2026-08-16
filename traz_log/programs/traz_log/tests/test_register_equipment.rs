@@ -90,6 +90,7 @@ fn setup() -> (LiteSVM, Keypair, Keypair, Pubkey) {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&op_base.pubkey(), &program_id),
                 wallet: op_base.pubkey(),
                 system_program: system_program::ID,
@@ -220,6 +221,7 @@ fn test_wrong_role_cannot_register_equipment() {
             traz_log::accounts::RegisterPersonnel {
                 signer: admin.pubkey(),
                 global_state: global_state_pda(&program_id),
+                signer_personnel: personnel_pda(&admin.pubkey(), &program_id),
                 new_personnel: personnel_pda(&operator.pubkey(), &program_id),
                 wallet: operator.pubkey(),
                 system_program: system_program::ID,

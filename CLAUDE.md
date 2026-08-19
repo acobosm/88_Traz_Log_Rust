@@ -177,10 +177,10 @@ Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental 
 - [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 5 vistas (Dashboard, Inventario, Admin, Incidente, Campo), las 9 instrucciones + 7 lecturas conectadas, build limpio, flujo completo validado en localnet
 - [x] Fase 5 (adelanto) — Guardrails `NotIncidentCommander` y `OperatorAlreadyAssigned` en `assign_equipment` (2 tests nuevos), bitácora on-chain `LogEntry` (`log_milestone` crea PDA histórico, 4 tests en `test_log_entry.rs`), panel de incidente + modal de bitácora en `IncidenteView.vue`
 - [x] Rama `main` creada (2026-08-19) y sincronizada en `ghp`/`glp`/`gla` — primera vez en el proyecto
-- [x] Fase 5.5 — QA manual completo con Phantom (libreto `simulacion_01.md`, 13/13 fases). Los 5 hallazgos de QA resueltos: #1 y #2 el 2026-08-15; #3 el 2026-08-19 en rama `5_1_equipment_status_view_fixes` (mergeada a `main`); #4 (dashboard por rol) y #5 (bitácora en Inventario + export PDF) el 2026-08-19 en rama `5_2_role_dashboard_and_log_export` (pendiente de mergear a `main`)
+- [x] Fase 5.5 — QA manual completo con Phantom (libreto `simulacion_01.md`, 13/13 fases). Los 5 hallazgos de QA resueltos: #1 y #2 el 2026-08-15; #3 el 2026-08-19 en rama `5_1_equipment_status_view_fixes` (mergeada a `main`); #4 (dashboard por rol) y #5 (bitácora en Inventario + export PDF) el 2026-08-19 en rama `5_2_role_dashboard_and_log_export` (mergeada a `main`)
 - [ ] Fase 6 — Deploy Devnet + QA end-to-end (bloqueada hasta terminar validación manual en localnet con Phantom)
 
-**Fase actual: 5.5 — los 5 hallazgos de QA resueltos; falta cerrar el merge de `5_2_role_dashboard_and_log_export` a `main` antes de pasar a Fase 6 (devnet deploy)**
+**Fase 5.5 cerrada — los 5 hallazgos de QA resueltos y mergeados a `main`. Lista para pasar a Fase 6 (devnet deploy)**
 **Tests acumulados: 44 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
 **Adelanto respecto al cronograma: ~35 días**
 

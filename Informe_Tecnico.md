@@ -908,8 +908,8 @@ Ejecutado el 2026-08-14/15. Las 13 fases se completaron sin desviaciones del res
 | 1 | `register_personnel` rechazaba a `OperationalBase` pese a estar documentado como rol válido | Bug de lógica (Rust) | **Resuelto 2026-08-15** — ver sección 9.3 |
 | 2 | Faltaba mostrar la descripción del incidente en la tabla de Inventario y en los selectores de la vista Incidente | UI | **Resuelto 2026-08-15** |
 | 3 | Vista "Consultar estado de equipo": falta combobox de selección, colores de estado/condición, nombre de operador, descripción de incidente, y la nota del reporte no se muestra | UI | **Resuelto 2026-08-19** — combobox, badges de color en estado/condición, nombre de operador vía `personnelMap`, descripción de incidente, y tabla de bitácora completa (más reciente primero) en `CampoView.vue` |
-| 4 | Dashboard sin sección específica por rol conectado (ej. equipos bajo custodia de un `Operator`) | Feature nueva | Pendiente |
-| 5 | Botón "Bitácora" solo accesible desde incidentes activos; falta también en la tabla de Inventario, y falta exportar a PDF | UI | Pendiente |
+| 4 | Dashboard sin sección específica por rol conectado (ej. equipos bajo custodia de un `Operator`) | Feature nueva | **Resuelto 2026-08-19** — sección aditiva por rol en `DashboardView.vue`: Operator (equipos bajo custodia), SceneCommander (incidentes propios), OperationalBase (inventario por estado + detalle clicable), Admin (personal por rol + incidentes activos, detalle clicable) |
+| 5 | Botón "Bitácora" solo accesible desde incidentes activos; falta también en la tabla de Inventario, y falta exportar a PDF | UI | **Resuelto 2026-08-19** — modal extraído a componente compartido `BitacoraModal.vue`, usado también en Inventario (columna "Acciones"); export a PDF con `jspdf`/`jspdf-autotable`. De paso se corrigió una inconsistencia visual: los badges de "Estado" en Inventario (Equipos e Incidentes) no traían la forma ovalada por faltarles la clase `badge` base |
 
 El hallazgo #1 es el único de severidad funcional (los demás son de experiencia de usuario); su resolución completa —causa raíz, fix, y test de regresión— está documentada en la sección 9.3.
 

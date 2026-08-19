@@ -57,7 +57,7 @@
               </td>
               <td class="mono">
                 {{ Object.keys(e.account.status)[0] === 'inUse'
-                  ? `#${e.account.incidentId.toString()} (${incidentCoordsMap[e.account.incidentId.toString()] ?? '?'})`
+                  ? `#${e.account.incidentId.toString()} · ${incidentCoordsMap[e.account.incidentId.toString()] ?? '?'}`
                   : '—' }}
               </td>
             </tr>

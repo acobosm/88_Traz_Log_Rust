@@ -7,7 +7,7 @@ Sistema de trazabilidad logística para operaciones de combate de incendios fore
 **Contrato original:** `03 Ethereum Practice/.../88_Traz_Log/contracts/TrazabilidadLogistica.sol` (635 líneas)
 **Directorio Rust:** `/home/ebit/projects/0 CodeCrypto Academy/04_Rust_Practice/88_Traz_Log/`
 **Programa Anchor:** `traz_log` (subdirectorio `88_Traz_Log/traz_log/`)
-**Plazo:** 50 días calendario — Jul 4 al Aug 22, 2026
+**Plazo de entrega final:** 28 Ago 2026
 
 ---
 
@@ -148,19 +148,9 @@ main → crear rama {N}_{name}
 
 *URLs a configurar cuando estén listos los repos remotos. Avisar a Claude para ejecutar `git remote add`.*
 
-## Estrategia de push a `gla` (simula desarrollo de 30 días)
+## Estrategia de push a `gla`
 
-Por acuerdo con los profesores: desarrollo real en julio (repos personales), push a `gla` desde el 3 de agosto distribuido para simular progresión de 30 días.
-
-| Fecha push | Qué sube a `gla` | Simula en el "proyecto 30 días" |
-|---|---|---|
-| Aug 3 | `0_anchor_fundamentals` + `main` | Semana 1: setup |
-| Aug 6 | `1_account_architecture` + `main` | Días 7–10: arquitectura |
-| Aug 9 | `2_registration_and_inventory` + `main` | Días 10–14: registro |
-| Aug 12 | `3_incident_management` + `main` | Días 14–21: incidentes |
-| Aug 15 | `4_return_and_close` + `main` | Días 21–25: retorno/cierre |
-| Aug 19 | `5_phantom_frontend` + `main` | Días 25–29: frontend |
-| Aug 22 | `6_devnet_deploy` + `main` | Días 29–30: deploy |
+Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental por rama para simular una progresión de ~30 días. El calendario de fechas específico no se versiona en este archivo — se gestiona aparte para evitar que quede desactualizado.
 
 ---
 
@@ -178,7 +168,7 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] 5 account structs (incluye `LogEntry`) + 3 enums + 5 eventos + 14 errores en `state.rs`, `events.rs`, `error.rs`
 - [x] Remoto `ghp` → `https://github.com/acobosm/88_Traz_Log_Rust.git`
 - [x] Remoto `glp` → `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git`
-- [ ] Remoto `gla` → pendiente (configurar desde agosto 3, 2026)
+- [x] Remoto `gla` → `https://gitlab.codecrypto.academy/andres.cobos/88_traz_log_rust.git` (configurado 2026-08-14)
 - [x] Fase 0 completada — 3 tests en verde (`test_initialize.rs`)
 - [x] Fase 1 completada — 5 tests en verde (`test_toggle_pause.rs`)
 - [x] Fase 2 completada — 10 tests en verde (`test_register_personnel.rs`, `test_register_equipment.rs`)
@@ -186,9 +176,11 @@ Por acuerdo con los profesores: desarrollo real en julio (repos personales), pus
 - [x] Fase 4 completada — 10 tests + 1 E2E en verde (`test_initiate_return.rs`, `test_close_incident.rs`, `test_e2e_full_flow.rs`)
 - [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 5 vistas (Dashboard, Inventario, Admin, Incidente, Campo), las 9 instrucciones + 7 lecturas conectadas, build limpio, flujo completo validado en localnet
 - [x] Fase 5 (adelanto) — Guardrails `NotIncidentCommander` y `OperatorAlreadyAssigned` en `assign_equipment` (2 tests nuevos), bitácora on-chain `LogEntry` (`log_milestone` crea PDA histórico, 4 tests en `test_log_entry.rs`), panel de incidente + modal de bitácora en `IncidenteView.vue`
+- [x] Rama `main` creada (2026-08-19) y sincronizada en `ghp`/`glp`/`gla` — primera vez en el proyecto
+- [x] Fase 5.5 — QA manual completo con Phantom (libreto `simulacion_01.md`, 13/13 fases). Hallazgos #1 (bug `register_personnel` con `OperationalBase`) y #2 (descripción de incidente faltante en UI) resueltos 2026-08-15; #3 (vista "Consultar estado de equipo": combobox, colores, nombre de operador, descripción de incidente, bitácora completa) resuelto 2026-08-19 en rama `5_1_equipment_status_view_fixes`, mergeada a `main`. Pendientes: #4 (dashboard con info por rol) y #5 (botón bitácora en Inventario + export PDF)
 - [ ] Fase 6 — Deploy Devnet + QA end-to-end (bloqueada hasta terminar validación manual en localnet con Phantom)
 
-**Fase actual: 5.5 — cerrando frontend/backend en localnet antes de pasar a devnet**
+**Fase actual: 5.5 — cerrando frontend/backend en localnet antes de pasar a devnet (2 hallazgos UI pendientes: #4 y #5)**
 **Tests acumulados: 44 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
 **Adelanto respecto al cronograma: ~35 días**
 

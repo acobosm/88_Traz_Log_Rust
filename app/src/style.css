@@ -83,6 +83,10 @@ main { flex: 1; padding: 2rem 1.5rem; max-width: 960px; margin: 0 auto; width: 1
 .badge-green { background: #22c55e20; color: var(--green); border: 1px solid var(--green); }
 .badge-red   { background: #ef444420; color: var(--red);   border: 1px solid var(--red); }
 
+.card-clickable { cursor: pointer; transition: border-color .15s, background .15s; }
+.card-clickable:hover { border-color: var(--accent); }
+.card-active { border-color: var(--accent); background: #f9731610; }
+
 .status { color: var(--muted); margin-bottom: 1rem; }
 .muted  { color: var(--muted); }
 
@@ -180,6 +184,7 @@ tr:hover td { background: #ffffff05; }
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
 }
+.modal-header-actions { display: flex; align-items: center; gap: 0.5rem; }
 .modal-header h3 { font-size: 0.95rem; font-weight: 600; color: var(--accent); }
 .modal-body { overflow-y: auto; }
 .btn-close {

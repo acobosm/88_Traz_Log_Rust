@@ -108,36 +108,14 @@
     </section>
 
     <!-- Modal bitácora -->
-    <div v-if="showLogModal" class="modal-overlay" @click.self="showLogModal = false">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Bitácora — {{ selectedEquipmentCode }}</h3>
-          <button class="btn-close" @click="showLogModal = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="loadingLog" class="empty">Cargando…</div>
-          <div v-else-if="logEntries.length === 0" class="empty">Sin reportes registrados para este equipo.</div>
-          <div v-else class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>#</th><th>Condición</th><th>Notas</th><th>Operador</th><th>Fecha/Hora</th></tr>
-              </thead>
-              <tbody>
-                <tr v-for="e in logEntries" :key="e.publicKey.toBase58()">
-                  <td>{{ e.account.entryIndex.toString() }}</td>
-                  <td>{{ formatCondition(e.account.condition) }}</td>
-                  <td>{{ e.account.notes }}</td>
-                  <td>
-                    {{ personnelMap[e.account.operator?.toBase58?.()] ?? shortKey(e.account.operator) }}
-                  </td>
-                  <td>{{ formatTimestamp(e.account.timestamp) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+    <BitacoraModal
+      v-if="showLogModal"
+      :equipment-code="selectedEquipmentCode"
+      :entries="logEntries"
+      :loading="loadingLog"
+      :personnel-map="personnelMap"
+      @close="showLogModal = false"
+    />
 
     <!-- Cerrar incidente -->
     <section class="section">
@@ -167,6 +145,7 @@
 import { reactive, ref, computed, onMounted } from 'vue'
 import { PublicKey } from '@solana/web3.js'
 import { useProgram, toCode } from '../composables/useProgram'
+import BitacoraModal from '../components/BitacoraModal.vue'
 
 const {
   fetchGlobalState, fetchAllEquipment, fetchAllIncidents, fetchAllPersonnel,
@@ -284,12 +263,6 @@ function statusClass(s: any): string {
     inRepair: 'badge-red', lost: 'badge-red', returning: 'badge-yellow',
   }
   return map[Object.keys(s)[0]] ?? ''
-}
-
-function formatTimestamp(ts: any): string {
-  const n = Number(ts.toString())
-  if (n === 0) return '—'
-  return new Date(n * 1000).toLocaleString()
 }
 
 function feedbackClass(msg: string) {

@@ -39,13 +39,13 @@
       <div v-else class="table-wrap">
         <table>
           <thead>
-            <tr><th>Código</th><th>Descripción</th><th>Estado</th><th>Condición</th><th>Consumo (L/h)</th><th>Custodio</th><th>Incidente</th></tr>
+            <tr><th>Código</th><th>Descripción</th><th>Estado</th><th>Condición</th><th>Consumo (L/h)</th><th>Custodio</th><th>Incidente</th><th>Acciones</th></tr>
           </thead>
           <tbody>
             <tr v-for="e in equipment" :key="e.publicKey.toBase58()">
               <td class="mono">{{ codeToStr(e.account.code) }}</td>
               <td>{{ e.account.description }}</td>
-              <td><span :class="statusClass(e.account.status)">{{ formatStatus(e.account.status) }}</span></td>
+              <td><span class="badge" :class="statusClass(e.account.status)">{{ formatStatus(e.account.status) }}</span></td>
               <td>{{ formatCondition(e.account.reportedCondition) }}</td>
               <td>{{ e.account.nominalConsumption.toString() }}</td>
               <td>
@@ -59,6 +59,9 @@
                 {{ Object.keys(e.account.status)[0] === 'inUse'
                   ? `#${e.account.incidentId.toString()} · ${incidentCoordsMap[e.account.incidentId.toString()] ?? '?'}`
                   : '—' }}
+              </td>
+              <td>
+                <button class="btn-log" @click="openLog(e)">Bitácora</button>
               </td>
             </tr>
           </tbody>
@@ -86,7 +89,7 @@
                 </span>
               </td>
               <td>
-                <span :class="i.account.isActive ? 'badge-green' : 'badge-red'">
+                <span class="badge" :class="i.account.isActive ? 'badge-green' : 'badge-red'">
                   {{ i.account.isActive ? 'Activo' : 'Cerrado' }}
                 </span>
               </td>
@@ -103,19 +106,35 @@
       </div>
     </section>
 
+    <!-- Modal bitácora -->
+    <BitacoraModal
+      v-if="showLogModal"
+      :equipment-code="selectedEquipmentCode"
+      :entries="logEntries"
+      :loading="loadingLog"
+      :personnel-map="personnelMap"
+      @close="showLogModal = false"
+    />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useProgram } from '../composables/useProgram'
+import BitacoraModal from '../components/BitacoraModal.vue'
 
-const { fetchAllPersonnel, fetchAllEquipment, fetchAllIncidents } = useProgram()
+const { fetchAllPersonnel, fetchAllEquipment, fetchAllIncidents, fetchLogEntries } = useProgram()
 
 const personnel = ref<any[]>([])
 const equipment = ref<any[]>([])
 const incidents = ref<any[]>([])
 const loading = ref(false)
+
+const showLogModal = ref(false)
+const selectedEquipmentCode = ref('')
+const logEntries = ref<any[]>([])
+const loadingLog = ref(false)
 
 const incidentsSorted = computed(() =>
   [...incidents.value].sort((a, b) =>
@@ -164,6 +183,17 @@ async function refresh() {
 }
 
 onMounted(refresh)
+
+async function openLog(e: any) {
+  selectedEquipmentCode.value = codeToStr(e.account.code)
+  showLogModal.value = true
+  loadingLog.value = true
+  try {
+    logEntries.value = await fetchLogEntries(e.account.code)
+  } finally {
+    loadingLog.value = false
+  }
+}
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 

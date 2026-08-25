@@ -7,7 +7,7 @@ use anchor_lang::prelude::*;
 pub struct GlobalState {
     pub next_incident_id: u64,
     pub is_paused: bool,
-    pub admin: Pubkey,
+    pub admin: Pubkey,  // única fuente de autoridad admin, no depende del role en PersonnelAccount
     pub bump: u8,
 }
 
@@ -33,8 +33,8 @@ pub struct EquipmentAccount {
     #[max_len(128)]
     pub description: String,
     pub nominal_consumption: u64,  // ml/hour
-    pub status: EquipmentStatus,
-    pub reported_condition: ReportedCondition,
+    pub status: EquipmentStatus,               // lo mueve el programa (asignación/retorno)
+    pub reported_condition: ReportedCondition, // lo reporta el operador en campo, no toca status
     pub custodian: Pubkey,
     pub incident_id: u64,
     pub use_start_time: i64,       // unix timestamp
@@ -53,7 +53,7 @@ pub struct IncidentAccount {
     pub risk_level: u8,            // 1–5
     pub is_active: bool,
     pub opened_at: i64,            // unix timestamp
-    pub commander: Pubkey,
+    pub commander: Pubkey,  // único wallet que puede asignar equipo a este incidente
     pub bump: u8,
 }
 
@@ -72,6 +72,7 @@ pub struct LogEntry {
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
+// quién puede hacer qué — se verifica con constraints en cada instrucción, sin AccessControl
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace, Debug)]
 pub enum Role {
     Admin,
@@ -80,6 +81,7 @@ pub enum Role {
     Operator,
 }
 
+// ciclo de vida del equipo, lo mueve el programa (assign/initiate_return)
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace, Debug)]
 pub enum EquipmentStatus {
     Available,
@@ -89,6 +91,7 @@ pub enum EquipmentStatus {
     Returning,
 }
 
+// condición que reporta el operador en campo vía log_milestone, es diferente de los estados de EquipmentStatus
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace, Debug)]
 pub enum ReportedCondition {
     Operational,

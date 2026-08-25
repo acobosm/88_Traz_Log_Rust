@@ -13,6 +13,7 @@ pub fn handler(
 
     let incident_id = ctx.accounts.incident.incident_id;
 
+    // un operador no puede quedar comprometido en dos incidentes activos a la vez
     let op = &mut ctx.accounts.operator_personnel;
     match op.current_incident {
         Some(existing) => require!(existing == incident_id, TrazLogError::OperatorAlreadyAssigned),
@@ -61,6 +62,7 @@ pub struct AssignEquipment<'info> {
         seeds = [SEED_INCIDENT, &incident_id.to_le_bytes()],
         bump = incident.bump,
         constraint = incident.is_active @ TrazLogError::IncidentNotActive,
+        // solo el jefe de escena que abrió el incidente puede asignarle equipo
         constraint = incident.commander == signer.key() @ TrazLogError::NotIncidentCommander,
     )]
     pub incident: Account<'info, IncidentAccount>,

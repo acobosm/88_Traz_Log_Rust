@@ -54,6 +54,8 @@ pub struct LogMilestone<'info> {
     )]
     pub equipment: Account<'info, EquipmentAccount>,
 
+    // log_count como parte de la seed: cada reporte crea un PDA nuevo en vez de
+    // sobrescribir uno solo, así queda el historial completo consultable on-chain
     #[account(
         init,
         payer = signer,

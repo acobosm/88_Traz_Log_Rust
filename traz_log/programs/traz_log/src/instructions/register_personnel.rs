@@ -13,6 +13,7 @@ pub fn handler(
     require!(!ctx.accounts.global_state.is_paused, TrazLogError::SystemPaused);
 
     let is_admin = ctx.accounts.global_state.admin == ctx.accounts.signer.key();
+    // UncheckedAccount porque Admin puede llamar esto sin tener su propio PersonnelAccount registrado
     let is_operational_base = {
         let info = ctx.accounts.signer_personnel.to_account_info();
         if info.owner == ctx.program_id {

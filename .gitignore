@@ -23,6 +23,9 @@ wallet.json
 # Análisis de migración y documentos previos (solo referencia local)
 Reference/
 
+# Notas y material de preparación personal (libretos, presentaciones, etc.)
+Presentacion/
+
 # ── IDEs y sistema operativo ─────────────────────────────
 .vscode/
 .idea/

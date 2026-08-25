@@ -10,6 +10,7 @@ pub fn handler(
 ) -> Result<()> {
     require!(!ctx.accounts.global_state.is_paused, TrazLogError::SystemPaused);
     let incident = &mut ctx.accounts.incident;
+    // transición perezosa — no libera el equipo, cada operador lo hace con initiate_return
     incident.is_active = false;
     let id = incident.incident_id;
     emit!(IncidentClosed { incident_id: id });

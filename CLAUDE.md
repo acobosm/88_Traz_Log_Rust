@@ -17,7 +17,7 @@ Sistema de trazabilidad logística para operaciones de combate de incendios fore
 - Validador local: **Surfpool** (default de Anchor 1.0.2 para `anchor test`/`anchor localnet`, flag `--validator surfpool|legacy`). Studio en `http://127.0.0.1:18488` para ver transacciones en tiempo real. `legacy` cae a `solana-test-validator` clásico.
 - Tests: Rust + LiteSVM 0.10 (Anchor 1.0 no usa TypeScript para tests)
 - Frontend: Vue.js + `@solana/wallet-adapter-vue` + Phantom
-- Red objetivo: Solana Devnet
+- Red objetivo: Localnet (Surfpool) — decisión final del alcance, ver nota en "Plan de fases"
 
 ---
 
@@ -120,12 +120,12 @@ Scope reducido respecto al contrato original. Análisis completo en `Reference/`
 | 3 | `3_incident_management` | `open_fire_incident`, `assign_equipment`, `log_milestone` + tests TS | Jul 22–29 |
 | 4 | `4_return_and_close` | `initiate_return`, `close_incident` + tests TS + flujo E2E completo | Jul 29–Aug 5 |
 | 5 | `5_phantom_frontend` | Vue.js reescrito: wallet adapter, paneles por rol, `getProgramAccounts`, event listeners. Incluye adelanto de `LogEntry` PDAs (bitácora on-chain) | Aug 5–17 |
-| 6 | `6_devnet_deploy` | `anchor deploy devnet`, QA manual con Phantom, verificar rent, correcciones UX | Aug 17–22 |
+| ~~6~~ | ~~`6_devnet_deploy`~~ | **Descartada — decisión final de alcance.** Se conversó con el cuerpo docente y el despliegue en Devnet no es requisito de calificación, es un extra opcional. El proyecto entregado cierra en Fase 5.5, validado por completo en localnet | — |
 | ~~*(opt)*~~ | ~~`7_onchain_log`~~ | **Absorbida en Fase 5** — ya no requiere rama propia | — |
 
 **Criterio de "done" por fase:**
 - Fases 0–4: `anchor test` pasa en verde (localnet)
-- Fases 5–6: demo funcional manual con Phantom
+- Fase 5 (y su cierre en 5.5): demo funcional manual con Phantom en localnet
 
 ### Flujo git por fase
 ```
@@ -178,9 +178,9 @@ Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental 
 - [x] Fase 5 (adelanto) — Guardrails `NotIncidentCommander` y `OperatorAlreadyAssigned` en `assign_equipment` (2 tests nuevos), bitácora on-chain `LogEntry` (`log_milestone` crea PDA histórico, 4 tests en `test_log_entry.rs`), panel de incidente + modal de bitácora en `IncidenteView.vue`
 - [x] Rama `main` creada (2026-08-19) y sincronizada en `ghp`/`glp`/`gla` — primera vez en el proyecto
 - [x] Fase 5.5 — QA manual completo con Phantom (libreto `simulacion_01.md`, 13/13 fases). Los 5 hallazgos de QA resueltos: #1 y #2 el 2026-08-15; #3 el 2026-08-19 en rama `5_1_equipment_status_view_fixes` (mergeada a `main`); #4 (dashboard por rol) y #5 (bitácora en Inventario + export PDF) el 2026-08-19 en rama `5_2_role_dashboard_and_log_export` (mergeada a `main`)
-- [ ] Fase 6 — Deploy Devnet + QA end-to-end (bloqueada hasta terminar validación manual en localnet con Phantom)
+- [x] Fase 6 — **Descartada como decisión final de alcance** (conversación con el cuerpo docente: el despliegue en Devnet no es requisito de calificación). El proyecto entregado cierra en Fase 5.5
 
-**Fase 5.5 cerrada — los 5 hallazgos de QA resueltos y mergeados a `main`. Lista para pasar a Fase 6 (devnet deploy)**
+**Proyecto cerrado en Fase 5.5 — los 5 hallazgos de QA resueltos y mergeados a `main`, validado por completo en localnet. Devnet queda fuera del alcance de entrega por decisión conjunta con el cuerpo docente**
 **Tests acumulados: 44 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
 **Adelanto respecto al cronograma: ~35 días**
 

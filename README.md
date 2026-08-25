@@ -14,7 +14,7 @@ Sistema de cadena de custodia para operaciones de combate de incendios forestale
 | Anchor CLI | 1.0.2 | framework de smart contracts |
 | Node.js | 18+ | para tests TypeScript y frontend |
 | npm | 9+ | incluido con Node.js |
-| Phantom Wallet | última | extensión de navegador, solo para demo en devnet |
+| Phantom Wallet | última | extensión de navegador, para usar el frontend |
 
 ---
 
@@ -115,43 +115,20 @@ Si por algún motivo necesitas el `solana-test-validator` clásico en vez de Sur
 
 Resultado esperado: todos los tests en verde con `passing`.
 
----
-
-## Demo en Devnet con Phantom Wallet
-
-### 1. Configurar wallet para devnet
-
-1. Instalar la extensión [Phantom Wallet](https://phantom.app) en el navegador
-2. En Phantom → Settings → Developer Settings → activar **Testnet Mode**
-3. Cambiar la red a **Solana Devnet**
-
-### 2. Obtener SOL de prueba
+### Iniciar el frontend (localnet)
 
 ```bash
-solana config set --url devnet
-solana airdrop 2
-```
-
-O desde el faucet web: https://faucet.solana.com
-
-### 3. Desplegar en devnet
-
-```bash
-cd traz_log
-anchor deploy --provider.cluster devnet
-```
-
-El Program ID se actualizará automáticamente en `Anchor.toml` y en `traz_log/src/lib.rs`.
-
-### 4. Iniciar el frontend
-
-```bash
-cd traz_log/app
+cd app
 npm install
 npm run dev
 ```
 
-Abrir `http://localhost:5173`, conectar Phantom y seleccionar el rol correspondiente.
+Abrir `http://localhost:5173`, conectar Phantom (red **Localnet**, `http://localhost:8899`).
+
+**Antes de cualquier otra acción, hay que inicializar el sistema una sola vez:**
+conectar con la wallet configurada como Admin (la que usó `anchor test`/`anchor deploy`
+para desplegar el programa) y hacer clic en **"Initialize"** desde el Dashboard. Sin
+este paso, cualquier otra instrucción falla porque `GlobalState` todavía no existe.
 
 ---
 
@@ -166,12 +143,12 @@ Abrir `http://localhost:5173`, conectar Phantom y seleccionar el rol correspondi
 │   │           └── lib.rs             # Programa Rust principal
 │   ├── tests/
 │   │   └── traz_log.ts                # Tests de integración TypeScript
-│   ├── app/                           # Frontend Vue.js + Phantom
 │   ├── migrations/
 │   │   └── deploy.ts
 │   ├── Anchor.toml                    # Configuración del workspace
 │   ├── Cargo.toml
 │   └── package.json
+├── app/                               # Frontend Vue.js + Phantom (raíz del repo, no dentro de traz_log/)
 ├── Reference/                         # Documentos de análisis (solo local, no en repo)
 ├── CLAUDE.md                          # Contexto del proyecto para asistente IA
 ├── README.md                          # Este archivo
@@ -235,9 +212,7 @@ Cada Operator ejecuta initiate_return para sus equipos
 | `2_registration_and_inventory` | toggle_pause, register_personnel, register_equipment |
 | `3_incident_management` | open_fire_incident, assign_equipment, log_milestone |
 | `4_return_and_close` | initiate_return, close_incident, tests E2E |
-| `5_phantom_frontend` | Frontend Vue.js con Phantom wallet |
-| `6_devnet_deploy` | Deploy en Solana Devnet + QA |
-| `7_onchain_log` *(opcional)* | Bitácora histórica on-chain con LogEntry PDAs |
+| `5_phantom_frontend` | Frontend Vue.js con Phantom wallet — incluye la bitácora on-chain (`LogEntry`), adelantada desde el plan original |
 
 ---
 
@@ -263,9 +238,5 @@ anchor test --detach --validator legacy   # fuerza solana-test-validator clásic
 ```
 Si el puerto `18488` (Studio) o `8899`/`8900` ya están en uso por una corrida previa que quedó colgada (ej. apagón abrupto), mata el proceso residual antes de reintentar.
 
-**Error `Program failed to deploy` en devnet:**
-Verificar saldo: `solana balance --url devnet`  
-Si es 0, hacer airdrop: `solana airdrop 2 --url devnet`
-
 **Phantom no conecta al frontend:**
-Confirmar que Phantom está en red **Devnet** y que el programa está desplegado en devnet con `anchor deploy`.
+Confirmar que Phantom está en red **Localnet** (`http://localhost:8899`) y que el programa está desplegado con `anchor test --detach` o `anchor deploy`.

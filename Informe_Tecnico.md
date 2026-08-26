@@ -7,8 +7,8 @@
 | Campo | Detalle |
 |---|---|
 | **Proyecto** | FireOPS — Sistema de Trazabilidad Logística |
-| **Versión** | 0.2.0 (Fase 5 — Frontend Vue 3 + Phantom + bitácora on-chain adelantada) |
-| **Fecha** | 2026-07-08 |
+| **Versión** | 0.2.0 (Fase 5 — Frontend Vue 3 + Phantom + bitácora on-chain) |
+| **Fecha** | 2026-08-07 |
 | **Autor** | Andres C. |
 | **Repositorio** | `04_Rust_Practice/88_Traz_Log` |
 | **Contrato original** | `TrazabilidadLogistica.sol` (635 líneas, Solidity ^0.8.19) |
@@ -44,7 +44,7 @@ La migración no es un port 1:1 — Solana opera bajo un modelo de ejecución fu
 | Solana CLI (Agave) | 3.1.10 | Cliente y validador local |
 | anchor-lang | 1.1.2 | Crate de macros y runtime de Anchor |
 | LiteSVM | 0.10.0 | Simulador de Solana para tests en Rust |
-| Red objetivo | Solana Devnet / Localnet | |
+| Red objetivo | Solana Localnet | |
 
 **Frontend (app/)**
 
@@ -66,33 +66,33 @@ La migración no es un port 1:1 — Solana opera bajo un modelo de ejecución fu
 En Solana, los programas son stateless — el estado vive en cuentas separadas derivadas determinísticamente (PDAs). El programa `traz_log` gestiona 5 tipos de cuentas:
 
 ```
-GlobalState PDA           PersonnelAccount PDA
-seeds: ["global"]         seeds: ["personnel", wallet_pubkey]
-─────────────────         ────────────────────────────────────
-next_incident_id: u64     wallet: Pubkey
-is_paused: bool           name: String (máx 64 chars)
-admin: Pubkey             specialty: String (máx 64 chars)
-bump: u8                  is_active: bool
-                          role: Role
-                          current_incident: Option<u64>   ← nuevo
-                          active_assignments: u8           ← nuevo
-                          bump: u8
+GlobalState PDA           				PersonnelAccount PDA
+seeds: ["global"]         				seeds: ["personnel", wallet_pubkey]
+─────────────────         				────────────────────────────────────
+next_incident_id: u64     				wallet: Pubkey
+is_paused: bool           				name: String (máx 64 chars)
+admin: Pubkey             				specialty: String (máx 64 chars)
+bump: u8                  				is_active: bool
+										role: Role
+										current_incident: Option<u64>
+										active_assignments: u8
+										bump: u8
 
-EquipmentAccount PDA              IncidentAccount PDA
-seeds: ["equipment", code[32]]    seeds: ["incident", id_le_bytes[8]]
-─────────────────────────         ──────────────────────────────────
-code: [u8; 32]                    incident_id: u64
-description: String (máx 128)     description: String (máx 64)   ← nuevo
-nominal_consumption: u64          coordinates: String (máx 128)
-status: EquipmentStatus           risk_level: u8
+EquipmentAccount PDA              		IncidentAccount PDA
+seeds: ["equipment", code[32]]    		seeds: ["incident", id_le_bytes[8]]
+─────────────────────────         		──────────────────────────────────
+code: [u8; 32]                    		incident_id: u64
+description: String (máx 128)     		description: String (máx 64)
+nominal_consumption: u64          		coordinates: String (máx 128)
+status: EquipmentStatus           		risk_level: u8
 reported_condition: ReportedCondition   is_active: bool
-custodian: Pubkey                 opened_at: i64
-incident_id: u64                  commander: Pubkey
-use_start_time: i64               bump: u8
-log_count: u64             ← nuevo
+custodian: Pubkey                 		opened_at: i64
+incident_id: u64                  		commander: Pubkey
+use_start_time: i64               		bump: u8
+log_count: u64
 bump: u8
 
-LogEntry PDA                              ← nueva cuenta (adelanto 7_onchain_log)
+LogEntry PDA
 seeds: ["log", equipment_code[32], entry_index_le_bytes[8]]
 ────────────────────────────────────────────────────────────
 equipment_code: [u8; 32]
@@ -157,36 +157,37 @@ Ambos casos están cubiertos por tests dedicados en `tests/test_assign_equipment
 │   ├── Anchor.toml
 │   ├── Cargo.toml
 │   ├── rust-toolchain.toml             Pinea Rust 1.89.0
-│   ├── programs/traz_log/src/
-│   │   ├── lib.rs                      Punto de entrada, enruta instrucciones
-│   │   ├── constants.rs                Seeds de los 4 PDAs
-│   │   ├── state.rs                    Account structs y enums
-│   │   ├── events.rs                   Structs de eventos emit!
-│   │   ├── error.rs                    Códigos de error custom
-│   │   ├── instructions.rs             Módulo agregador (glob re-exports)
-│   │   └── instructions/
-│   │       ├── initialize.rs
-│   │       ├── toggle_pause.rs
-│   │       ├── register_personnel.rs
-│   │       ├── register_equipment.rs
-│   │       ├── open_fire_incident.rs
-│   │       ├── assign_equipment.rs
-│   │       ├── log_milestone.rs
-│   │       ├── initiate_return.rs
-│   │       └── close_incident.rs
-│   ├── target/idl/traz_log.json        IDL generado por anchor build
-│   └── tests/                          12 suites LiteSVM (44 tests)
-│       ├── test_initialize.rs
-│       ├── test_toggle_pause.rs
-│       ├── test_register_personnel.rs
-│       ├── test_register_equipment.rs
-│       ├── test_open_fire_incident.rs
-│       ├── test_assign_equipment.rs
-│       ├── test_log_milestone.rs
-│       ├── test_log_entry.rs           Bitácora on-chain (LogEntry PDAs)
-│       ├── test_initiate_return.rs
-│       ├── test_close_incident.rs
-│       └── test_e2e_full_flow.rs
+│   ├── programs/traz_log/
+│   │   ├── src/
+│   │   │   ├── lib.rs                      Punto de entrada, enruta instrucciones
+│   │   │   ├── constants.rs                Seeds de los 4 PDAs
+│   │   │   ├── state.rs                    Account structs y enums
+│   │   │   ├── events.rs                   Structs de eventos emit!
+│   │   │   ├── error.rs                    Códigos de error custom
+│   │   │   ├── instructions.rs             Módulo agregador (glob re-exports)
+│   │   │   └── instructions/
+│   │   │       ├── initialize.rs
+│   │   │       ├── toggle_pause.rs
+│   │   │       ├── register_personnel.rs
+│   │   │       ├── register_equipment.rs
+│   │   │       ├── open_fire_incident.rs
+│   │   │       ├── assign_equipment.rs
+│   │   │       ├── log_milestone.rs
+│   │   │       ├── initiate_return.rs
+│   │   │       └── close_incident.rs
+│   │   └── tests/                          12 suites LiteSVM (50 tests)
+│   │       ├── test_initialize.rs
+│   │       ├── test_toggle_pause.rs
+│   │       ├── test_register_personnel.rs
+│   │       ├── test_register_equipment.rs
+│   │       ├── test_open_fire_incident.rs
+│   │       ├── test_assign_equipment.rs
+│   │       ├── test_log_milestone.rs
+│   │       ├── test_log_entry.rs           Bitácora on-chain (LogEntry PDAs)
+│   │       ├── test_initiate_return.rs
+│   │       ├── test_close_incident.rs
+│   │       └── test_e2e_full_flow.rs
+│   └── target/idl/traz_log.json        IDL generado por anchor build
 └── app/                                Frontend Vue 3 + Phantom (Fase 5)
     ├── vite.config.ts
     ├── tsconfig.app.json
@@ -237,10 +238,10 @@ Define las 5 estructuras de cuenta (PDAs) y los 3 enums del dominio.
 
 ```
 Parámetros:
-  next_incident_id: u64     Contador autoincremental para IDs de incidentes
-  is_paused: bool           Flag de circuit breaker del sistema
-  admin: Pubkey             Dirección con privilegios de administrador
-  bump: u8                  Bump canónico del PDA (guardado para eficiencia)
+  next_incident_id: u64     	Contador autoincremental para IDs de incidentes
+  is_paused: bool           	Flag de circuit breaker del sistema
+  admin: Pubkey             	Dirección con privilegios de administrador
+  bump: u8                  	Bump canónico del PDA (guardado para eficiencia)
 
 Espacio: 8 (discriminador) + 8 + 1 + 32 + 1 = 50 bytes
 Rent exemption aprox.: 348,000 lamports (~0.000348 SOL)
@@ -250,14 +251,14 @@ Rent exemption aprox.: 348,000 lamports (~0.000348 SOL)
 
 ```
 Parámetros:
-  wallet: Pubkey            Dirección de la wallet del brigadista
-  name: String              Nombre completo (máx. 64 caracteres)
-  specialty: String         Especialidad/cargo (máx. 64 caracteres)
-  is_active: bool           Si el personal está activo en el sistema
-  role: Role                Rol asignado (enum de 4 variantes)
+  wallet: Pubkey            	Dirección de la wallet del brigadista
+  name: String              	Nombre completo (máx. 64 caracteres)
+  specialty: String         	Especialidad/cargo (máx. 64 caracteres)
+  is_active: bool           	Si el personal está activo en el sistema
+  role: Role                	Rol asignado (enum de 4 variantes)
   current_incident: Option<u64>  Incidente activo que lo compromete (None si libre)
-  active_assignments: u8    Equipos InUse a su cargo; al llegar a 0 se limpia current_incident
-  bump: u8                  Bump canónico del PDA
+  active_assignments: u8    	Equipos InUse a su cargo; al llegar a 0 se limpia current_incident
+  bump: u8                  	Bump canónico del PDA
 
 Espacio: 8 + 32 + (4+64) + (4+64) + 1 + 1 + (1+8) + 1 + 1 = 189 bytes
 Rent exemption aprox.: 1,315,440 lamports (~0.00132 SOL)
@@ -267,16 +268,16 @@ Rent exemption aprox.: 1,315,440 lamports (~0.00132 SOL)
 
 ```
 Parámetros:
-  code: [u8; 32]            Código único del equipo (equivalente a bytes32)
-  description: String       Descripción del equipo (máx. 128 caracteres)
-  nominal_consumption: u64  Consumo nominal en ml/hora
-  status: EquipmentStatus   Estado actual (enum de 5 variantes)
+  code: [u8; 32]            	Código único del equipo (equivalente a bytes32)
+  description: String       	Descripción del equipo (máx. 128 caracteres)
+  nominal_consumption: u64  	Consumo nominal en ml/hora
+  status: EquipmentStatus   	Estado actual (enum de 5 variantes)
   reported_condition: ReportedCondition  Condición reportada (enum 4 variantes)
-  custodian: Pubkey         Wallet del operador custodio (Pubkey::default si disponible)
-  incident_id: u64          ID del incidente asignado (0 si disponible)
-  use_start_time: i64       Unix timestamp de inicio de uso (0 si disponible)
-  log_count: u64            Número de LogEntry creados para este equipo
-  bump: u8                  Bump canónico del PDA
+  custodian: Pubkey         	Wallet del operador custodio (Pubkey::default si disponible)
+  incident_id: u64          	ID del incidente asignado (0 si disponible)
+  use_start_time: i64       	Unix timestamp de inicio de uso (0 si disponible)
+  log_count: u64            	Número de LogEntry creados para este equipo
+  bump: u8                  	Bump canónico del PDA
 
 Espacio: 8 + 32 + (4+128) + 8 + 1 + 1 + 32 + 8 + 8 + 8 + 1 = 239 bytes
 Rent exemption aprox.: 1,663,440 lamports (~0.00166 SOL)
@@ -286,14 +287,14 @@ Rent exemption aprox.: 1,663,440 lamports (~0.00166 SOL)
 
 ```
 Parámetros:
-  incident_id: u64          ID único del incidente (del contador en GlobalState)
-  description: String       Descripción breve del incidente (máx. 64 caracteres)
-  coordinates: String       Coordenadas GPS / descripción del lugar (máx. 128 chars)
-  risk_level: u8            Nivel de riesgo 1-5
-  is_active: bool           Si el incidente está activo
-  opened_at: i64            Unix timestamp de apertura
-  commander: Pubkey         Wallet del SceneCommander que abrió el incidente
-  bump: u8                  Bump canónico del PDA
+  incident_id: u64          	ID único del incidente (del contador en GlobalState)
+  description: String       	Descripción breve del incidente (máx. 64 caracteres)
+  coordinates: String       	Coordenadas GPS / descripción del lugar (máx. 128 chars)
+  risk_level: u8            	Nivel de riesgo 1-5
+  is_active: bool           	Si el incidente está activo
+  opened_at: i64            	Unix timestamp de apertura
+  commander: Pubkey         	Wallet del SceneCommander que abrió el incidente
+  bump: u8                  	Bump canónico del PDA
 
 Espacio: 8 + 8 + (4+64) + (4+128) + 1 + 1 + 8 + 32 + 1 = 259 bytes
 Rent exemption aprox.: 1,802,640 lamports (~0.0018 SOL)
@@ -303,13 +304,13 @@ Rent exemption aprox.: 1,802,640 lamports (~0.0018 SOL)
 
 ```
 Parámetros:
-  equipment_code: [u8; 32]  Código del equipo reportado
-  notes: String             Nota de campo (máx. 256 caracteres)
+  equipment_code: [u8; 32]  	Código del equipo reportado
+  notes: String             	Nota de campo (máx. 256 caracteres)
   condition: ReportedCondition  Condición reportada en este hito (enum 4 variantes)
-  operator: Pubkey          Wallet del operador que reportó
-  timestamp: i64            Unix timestamp del reporte
-  entry_index: u64          Índice secuencial (copia de equipment.log_count al momento de crear)
-  bump: u8                  Bump canónico del PDA
+  operator: Pubkey          	Wallet del operador que reportó
+  timestamp: i64            	Unix timestamp del reporte
+  entry_index: u64          	Índice secuencial (copia de equipment.log_count al momento de crear)
+  bump: u8                  	Bump canónico del PDA
 
 Espacio: 8 + 32 + (4+256) + 1 + 32 + 8 + 8 + 1 = 350 bytes
 Rent exemption aprox.: 2,436,000 lamports (~0.00244 SOL)
@@ -614,7 +615,7 @@ Crea un cliente `Program` de Anchor usando el IDL y el adaptador de wallet. El p
 | `equipmentPda(code)` | `[b"equipment", code[32]]` |
 | `incidentPda(id)` | `[b"incident", id.to_le_bytes()]` |
 
-**Instrucciones disponibles:** `initialize`, `togglePause`, `registerPersonnel`, `registerEquipment`, `openFireIncident`, `assignEquipment`, `closeIncident`, `logMilestone`, `initiateReturn` — las 9 instrucciones del programa conectadas al cliente Anchor.
+**Instrucciones disponibles:** `initialize`, `togglePause`, `registerPersonnel`, `registerEquipment`, `openFireIncident`, `assignEquipment`, `closeIncident`, `logMilestone`, `initiateReturn` — las 9 instrucciones del programa conectadas al cliente Anchor. Cabe resaltar que `initialize` solo se ejecuta una sola vez al inicio de la ejecución de la aplicación y no vuelve a ser requerida para el resto del funcionamiento.
 
 **Lecturas disponibles:** `fetchGlobalState()`, `fetchIncident(id)`, `fetchEquipment(code)`, `fetchAllPersonnel()`, `fetchAllEquipment()`, `fetchAllIncidents()`, `fetchLogEntries(code)` — las últimas cuatro usan `getProgramAccounts`/`.all()` para listar todas las cuentas del tipo correspondiente. `fetchLogEntries` trae todas las `LogEntry` del programa, filtra por `equipment_code` en el cliente y ordena por `entry_index` ascendente.
 
@@ -655,13 +656,13 @@ Anchor 1.0 usa `#[derive(InitSpace)]` para calcular el espacio automáticamente.
 | `LogEntry` | 8 + 32 + (4+256) + 1 + 32 + 8 + 8 + 1 | **350 bytes** | ~0.00244 SOL |
 
 > **Estimación de costo de deploy completo** (1 GlobalState + 10 personal + 50 equipos + 5 incidentes + 100 reportes de bitácora):
-> 50 + (10×189) + (50×239) + (5×259) + (100×350) = 50,185 bytes → ~0.35 SOL en devnet. La bitácora on-chain (`LogEntry`) es el mayor costo marginal por el `notes` de hasta 256 bytes — a considerar en la Fase 6 si el volumen de reportes es alto.
+> 50 + (10×189) + (50×239) + (5×259) + (100×350) = 50,185 bytes → ~0.35. La bitácora on-chain (`LogEntry`) es el mayor costo marginal por el `notes` de hasta 256 bytes — a considerar en la Fase 6 si el volumen de reportes es alto.
 
 ---
 
 ## 7. Resultados de Tests
 
-Ejecutado el 2026-07-08. Comando: `cargo test`
+Comando: `cargo test`
 
 ```
 warning: ambiguous glob re-exports
@@ -756,13 +757,14 @@ test test_wrong_role_cannot_register_equipment ... ok
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
 
      Running tests/test_register_personnel.rs
-running 5 tests
+running 6 tests
 test test_non_admin_cannot_register_personnel ... ok
-test test_personnel_account_size_is_189_bytes ... ok
-test test_admin_registers_personnel_successfully ... ok
 test test_personnel_account_fields_are_correct ... ok
+test test_admin_registers_personnel_successfully ... ok
+test test_personnel_account_size_is_189_bytes ... ok
 test test_paused_system_blocks_personnel_registration ... ok
-test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+test test_operational_base_can_register_personnel ... ok
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
 
      Running tests/test_toggle_pause.rs
 running 5 tests
@@ -778,7 +780,7 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 ```
 
-**Resumen acumulado (actualizado 2026-08-15):** 45 tests pasados, 0 fallidos.
+**Resumen acumulado (actualizado 2026-08-26):** 50 tests pasados, 0 fallidos.
 
 | Suite | Tests | Archivo |
 |---|---|---|
@@ -861,17 +863,15 @@ Este patrón (cuenta `UncheckedAccount` + deserialización manual condicionada a
 | **3** | `3_incident_management` | **Completada** | 15 tests: IncidentAccount (tamaño, campos, contador), asignación de equipo, restricciones de rol y custodio en log_milestone |
 | **4** | `4_return_and_close` | **Completada** | 10 tests: retorno de equipo (custodia, doble retorno, roles), cierre de incidente (lazy-close, idempotencia, roles); 1 test E2E del ciclo completo de 8 pasos |
 | **5** | `5_phantom_frontend` | **Completada** | Vue 3 + Vite + Phantom: `useWallet`, `useProgram`, 5 vistas, 9 instrucciones conectadas, panel de incidente, modal de bitácora, build sin errores. Incluye guardrails de `NotIncidentCommander`/`OperatorAlreadyAssigned` y adelanto de `LogEntry` (bitácora on-chain) |
-| **5.5** | `5_phantom_frontend` (continuación) | **En curso** | QA manual completo con Phantom real (libreto `simulacion_01.md`, 13 fases) — ver sección 11. 1 bug de lógica encontrado y corregido (`register_personnel`/`OperationalBase`), varias mejoras de UI identificadas y en resolución |
-| 6 | `6_devnet_deploy` | Pendiente — bloqueada hasta cerrar Fase 5.5 | Deploy a Solana Devnet + QA end-to-end con Phantom real |
-| ~~*(opt)*~~ | ~~`7_onchain_log`~~ | **Absorbida en Fase 5** | `LogEntry` PDAs, bitácora histórica queryable — implementada antes de lo planeado, no requiere rama propia |
+| **5.5** | `5_1_equipment_status_view_fixes`, `5_2_role_dashboard_and_log_export` | **Completada** | QA manual completo con Phantom real (libreto `simulacion_01.md`, 13 fases) — ver sección 11. Los 5 hallazgos de QA resueltos y mergeados a `main`. Proyecto cerrado en esta fase, validado por completo en localnet |
 
 ### Remotos Git configurados
 
 | Alias | URL | Estrategia |
 |---|---|---|
-| `ghp` | `https://github.com/acobosm/88_Traz_Log_Rust.git` | Push continuo durante desarrollo |
-| `glp` | `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git` | Push continuo durante desarrollo |
-| `gla` | `https://gitlab.codecrypto.academy/andres.cobos/88_traz_log_rust.git` | Configurado 2026-08-14. Push incremental por rama para simular ~30 días de desarrollo (calendario interno, no publicado en este documento) |
+| `ghp` | `https://github.com/acobosm/88_Traz_Log_Rust.git` | Push de ramas -> merge a main -> push de main |
+| `glp` | `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git` | Push de ramas -> merge a main -> push de main |
+| `gla` | `https://gitlab.codecrypto.academy/andres.cobos/88_traz_log_rust.git` | Push de ramas -> merge a main -> push de main |
 
 ---
 
@@ -881,11 +881,11 @@ Este patrón (cuenta `UncheckedAccount` + deserialización manual condicionada a
 
 Los tests automatizados de las secciones 5–7 verifican la lógica del programa en aislamiento (LiteSVM, en memoria, sin frontend ni wallet real). Para cerrar la Fase 5 se diseñó y ejecutó adicionalmente un **libreto de QA manual** (`simulacion_01.md`, en la raíz del repo) que ejercita el sistema completo — Surfpool como validador local, frontend Vue real en `localhost:5173`, firma real vía Phantom — con una narrativa de 13 fases y 5 personajes (Sofía Ramírez, Andrés Paredes, Marta Chávez, Diego Salazar, Valeria Núñez) más el Admin, cubriendo un día completo de operación con 3 incidentes forestales simultáneos/consecutivos.
 
-El libreto incluye deliberadamente pasos marcados ⛔ (deben fallar) para confirmar que los guardrails de seguridad rechazan operaciones inválidas, no solo que el camino feliz funciona.
+El libreto incluye deliberadamente pasos marcados ⛔ (deben fallar) para confirmar que los guardrails de seguridad rechazan operaciones inválidas, no solo que el happy path funciona.
 
 ### 11.2 Resultados
 
-Ejecutado el 2026-08-14/15. Las 13 fases se completaron sin desviaciones del resultado esperado. Checklist final del libreto:
+Las 13 fases se completaron sin desviaciones del resultado esperado. Checklist final del libreto:
 
 | Verificación | Resultado |
 |---|---|
@@ -924,5 +924,3 @@ solana program extend <program-id> <bytes-adicionales> --url http://localhost:88
 Este comando amplía el espacio reservado (pagado como rent-exempt adicional por la autoridad de upgrade) sin cambiar el Program ID — la alternativa histórica, antes de que este comando existiera, era desplegar bajo una dirección nueva, rompiendo toda referencia externa al programa. Se extendió con margen (+100.000 bytes) para no repetir este paso en cada ajuste menor durante el resto de la Fase 5.5.
 
 ---
-
-> Este informe se actualiza al completar cada fase. Los resultados de `cargo test` en la Sección 7 se reemplazan con el output de la fase más reciente.

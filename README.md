@@ -1,6 +1,6 @@
 # FireOPS — Sistema de Trazabilidad Logística (Rust/Anchor)
 
-Port del sistema FireOPS de Solidity/Ethereum a **Rust/Anchor en Solana**.  
+Conversión del sistema FireOPS de Solidity/Ethereum a **Rust/Anchor en Solana**.  
 Sistema de cadena de custodia para operaciones de combate de incendios forestales: gestiona personal, equipos, incidentes y retorno de recursos con firma digital.
 
 ---
@@ -106,12 +106,12 @@ Anchor levanta Surfpool, despliega el programa, ejecuta todos los tests TypeScri
 cd traz_log
 anchor test --detach
 
-# Terminal 2: frontend u otros comandos
+# Terminal 2: frontend u otros comandos y requeridos cuando se desarrolle el frontend
 ```
 
 Abre `http://127.0.0.1:18488` para ver el Studio con las transacciones en vivo.
 
-Si por algún motivo necesitas el `solana-test-validator` clásico en vez de Surfpool, usa `--validator legacy` en `anchor test` o `anchor localnet`.
+Si por algún motivo necesitas el `solana-test-validator` clásico en vez de Surfpool, usar `--validator legacy` en `anchor test` o `anchor localnet`.
 
 Resultado esperado: todos los tests en verde con `passing`.
 
@@ -212,15 +212,7 @@ Cada Operator ejecuta initiate_return para sus equipos
 | `2_registration_and_inventory` | toggle_pause, register_personnel, register_equipment |
 | `3_incident_management` | open_fire_incident, assign_equipment, log_milestone |
 | `4_return_and_close` | initiate_return, close_incident, tests E2E |
-| `5_phantom_frontend` | Frontend Vue.js con Phantom wallet — incluye la bitácora on-chain (`LogEntry`), adelantada desde el plan original |
-
----
-
-## Proyecto original en Solidity
-
-Este proyecto es la traducción de:  
-`TrazabilidadLogistica.sol` — sistema FireOPS desarrollado con Foundry/Solidity para Ethereum.  
-El análisis de migración completo (mapeo de patrones, rediseño de componentes, estimación de esfuerzo) está disponible en el directorio `Reference/` del repositorio local.
+| `5_phantom_frontend` | Frontend Vue.js con Phantom wallet — incluye la bitácora on-chain (`LogEntry`) |
 
 ---
 

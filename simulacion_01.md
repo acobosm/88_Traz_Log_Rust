@@ -130,7 +130,7 @@ Equipo que se registrará (todo por Marta, en **Admin → Registrar equipo**):
 
 ## 2. Fase 0 — Setup (wallet Admin)
 
-Conecta Phantom con la wallet **Admin**. Ve a la pestaña **Admin**.
+Conecta Phantom con la wallet **Admin**. En la parte superior de la APP, ve a la pestaña **Admin**.
 
 1. ✅ **Initialize Sistema** — botón "Initialize Sistema". Debe quedar como admin tu wallet.
    👁 Verifica en **Dashboard**: estado "Activo", admin = tu pubkey.
@@ -270,9 +270,6 @@ cierra el incidente.
    confirma indirectamente en la Fase 11 cuando puede tomar equipo nuevo).
 2. Cambia Phantom a **Sofía**. **Incidente → Cerrar incidente**, selecciona `#0`.
    ✅ Debe cerrarse. 👁 En **Inventario** el incidente #0 pasa a "Cerrado".
-3. Bonus — error humano por cansancio: Sofía, distraída, intenta cerrar el `#0`
-   **otra vez**.
-   ⛔ **Debe fallar** con `IncidentAlreadyClosed`.
 
 ---
 
@@ -335,7 +332,6 @@ puede reciclar), Marta da de alta equipo nuevo.
 - [ ] Bitácora con **Daño menor** (Fase 7, `RADIO-01`)
 - [ ] Bitácora con **Daño crítico** (Fase 7, `BOMBA-02`)
 - [ ] Equipo sin bitácora reportada, retornado igual sin bloquear el flujo (`GPS-01`)
-- [ ] `IncidentAlreadyClosed` disparado por error de doble clic (Fase 8)
 - [ ] Un operador liberado (`initiate_return` hasta 0 asignaciones) puede tomar
       equipo en un incidente nuevo (Fase 8 → Fase 10, Diego)
 - [ ] 3 incidentes abiertos, 3 cerrados, sin reciclar equipo `Returning`

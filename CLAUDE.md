@@ -4,7 +4,6 @@
 Traducción de `TrazabilidadLogistica.sol` (Solidity/Foundry) a Rust/Anchor + Phantom Wallet.
 Sistema de trazabilidad logística para operaciones de combate de incendios forestales.
 
-**Contrato original:** `03 Ethereum Practice/.../88_Traz_Log/contracts/TrazabilidadLogistica.sol` (635 líneas)
 **Directorio Rust:** `/home/ebit/projects/0 CodeCrypto Academy/04_Rust_Practice/88_Traz_Log/`
 **Programa Anchor:** `traz_log` (subdirectorio `88_Traz_Log/traz_log/`)
 **Plazo de entrega final:** 28 Ago 2026
@@ -35,7 +34,7 @@ Ejemplos: `feat: add register_personnel instruction`, `test: add toggle_pause ha
 
 ## Alcance: MVP ampliado
 
-Scope reducido respecto al contrato original. Análisis completo en `Reference/`.
+Scope reducido respecto al contrato original hecho en Solidity.
 
 ### 8 instrucciones incluidas
 
@@ -114,26 +113,22 @@ Scope reducido respecto al contrato original. Análisis completo en `Reference/`
 
 | # | Rama | Contenido | Fechas |
 |---|---|---|---|
-| 0 | `0_anchor_fundamentals` | Tutoriales counter + escrow, `anchor init traz_log`, `.gitignore`, `anchor build` verde | Jul 4–13 |
-| 1 | `1_account_architecture` | 4 account structs con tamaños, enums, seeds, 8 stubs vacíos que compilan | Jul 13–18 |
-| 2 | `2_registration_and_inventory` | `toggle_pause`, `register_personnel`, `register_equipment` + tests TS | Jul 18–22 |
-| 3 | `3_incident_management` | `open_fire_incident`, `assign_equipment`, `log_milestone` + tests TS | Jul 22–29 |
-| 4 | `4_return_and_close` | `initiate_return`, `close_incident` + tests TS + flujo E2E completo | Jul 29–Aug 5 |
-| 5 | `5_phantom_frontend` | Vue.js reescrito: wallet adapter, paneles por rol, `getProgramAccounts`, event listeners. Incluye adelanto de `LogEntry` PDAs (bitácora on-chain) | Aug 5–17 |
+| 0 | `0_anchor_fundamentals` | Tutoriales counter + escrow, `anchor init traz_log`, `.gitignore`, `anchor build` sin errores | 1ra semana |
+| 1 | `1_account_architecture` | 4 account structs con tamaños, enums, seeds, 8 stubs vacíos que compilan | 1y 2da semana |
+| 2 | `2_registration_and_inventory` | `toggle_pause`, `register_personnel`, `register_equipment` + tests TS | 2da semana |
+| 3 | `3_incident_management` | `open_fire_incident`, `assign_equipment`, `log_milestone` + tests TS | 2 y 3ra semana |
+| 4 | `4_return_and_close` | `initiate_return`, `close_incident` + tests TS + flujo E2E completo | 3ra semana |
+| 5 | `5_phantom_frontend` | Vue.js reescrito: wallet adapter, paneles por rol, `getProgramAccounts`, event listeners. Incluye adelanto de `LogEntry` PDAs (bitácora on-chain) | 4ta semana |
 | ~~6~~ | ~~`6_devnet_deploy`~~ | **Descartada — decisión final de alcance.** Se conversó con el cuerpo docente y el despliegue en Devnet no es requisito de calificación, es un extra opcional. El proyecto entregado cierra en Fase 5.5, validado por completo en localnet | — |
 | ~~*(opt)*~~ | ~~`7_onchain_log`~~ | **Absorbida en Fase 5** — ya no requiere rama propia | — |
-
-**Criterio de "done" por fase:**
-- Fases 0–4: `anchor test` pasa en verde (localnet)
-- Fase 5 (y su cierre en 5.5): demo funcional manual con Phantom en localnet
 
 ### Flujo git por fase
 ```
 main → crear rama {N}_{name}
          → desarrollar + testear
-         → push a ghp y glp  (libre, cualquier fecha)
+         → push a repos remotos
          → merge a main
-         → push main a ghp y glp
+         → push main a repos remotos
 ```
 
 ---
@@ -142,17 +137,11 @@ main → crear rama {N}_{name}
 
 | Nombre | Destino | Restricción |
 |---|---|---|
-| `ghp` | GitHub personal | Libre, cualquier fecha |
-| `glp` | GitLab personal | Libre, cualquier fecha |
-| `gla` | GitLab academia | **Solo desde agosto 3, 2026** |
+| `ghp` | GitHub personal | Ninguna |
+| `glp` | GitLab personal | Ninguna |
+| `gla` | GitLab academia | Ninguna |
 
-*URLs a configurar cuando estén listos los repos remotos. Avisar a Claude para ejecutar `git remote add`.*
-
-## Estrategia de push a `gla`
-
-Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental por rama para simular una progresión de ~30 días. El calendario de fechas específico no se versiona en este archivo — se gestiona aparte para evitar que quede desactualizado.
-
----
+*URLs a configurar cuando estén listos los repos remotos.*
 
 ## Estado actual del proyecto
 
@@ -168,7 +157,7 @@ Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental 
 - [x] 5 account structs (incluye `LogEntry`) + 3 enums + 5 eventos + 14 errores en `state.rs`, `events.rs`, `error.rs`
 - [x] Remoto `ghp` → `https://github.com/acobosm/88_Traz_Log_Rust.git`
 - [x] Remoto `glp` → `https://gitlab.com/acobosm1/web3-blockchain/88_traz_log_rust.git`
-- [x] Remoto `gla` → `https://gitlab.codecrypto.academy/andres.cobos/88_traz_log_rust.git` (configurado 2026-08-14)
+- [x] Remoto `gla` → `https://gitlab.codecrypto.academy/andres.cobos/88_traz_log_rust.git`
 - [x] Fase 0 completada — 3 tests en verde (`test_initialize.rs`)
 - [x] Fase 1 completada — 5 tests en verde (`test_toggle_pause.rs`)
 - [x] Fase 2 completada — 10 tests en verde (`test_register_personnel.rs`, `test_register_equipment.rs`)
@@ -176,12 +165,12 @@ Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental 
 - [x] Fase 4 completada — 10 tests + 1 E2E en verde (`test_initiate_return.rs`, `test_close_incident.rs`, `test_e2e_full_flow.rs`)
 - [x] Fase 5 completada — Vue 3 + Vite + Phantom: scaffold, `useWallet`, `useProgram`, 5 vistas (Dashboard, Inventario, Admin, Incidente, Campo), las 9 instrucciones + 7 lecturas conectadas, build limpio, flujo completo validado en localnet
 - [x] Fase 5 (adelanto) — Guardrails `NotIncidentCommander` y `OperatorAlreadyAssigned` en `assign_equipment` (2 tests nuevos), bitácora on-chain `LogEntry` (`log_milestone` crea PDA histórico, 4 tests en `test_log_entry.rs`), panel de incidente + modal de bitácora en `IncidenteView.vue`
-- [x] Rama `main` creada (2026-08-19) y sincronizada en `ghp`/`glp`/`gla` — primera vez en el proyecto
+- [x] Rama `main` creada y sincronizada en `ghp`/`glp`/`gla`
 - [x] Fase 5.5 — QA manual completo con Phantom (libreto `simulacion_01.md`, 13/13 fases). Los 5 hallazgos de QA resueltos: #1 y #2 el 2026-08-15; #3 el 2026-08-19 en rama `5_1_equipment_status_view_fixes` (mergeada a `main`); #4 (dashboard por rol) y #5 (bitácora en Inventario + export PDF) el 2026-08-19 en rama `5_2_role_dashboard_and_log_export` (mergeada a `main`)
 - [x] Fase 6 — **Descartada como decisión final de alcance** (conversación con el cuerpo docente: el despliegue en Devnet no es requisito de calificación). El proyecto entregado cierra en Fase 5.5
 
 **Proyecto cerrado en Fase 5.5 — los 5 hallazgos de QA resueltos y mergeados a `main`, validado por completo en localnet. Devnet queda fuera del alcance de entrega por decisión conjunta con el cuerpo docente**
-**Tests acumulados: 44 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
+**Tests acumulados: 50 pasando, 0 fallidos — backend Rust/Anchor 100% verificado**
 **Adelanto respecto al cronograma: ~35 días**
 
 ---
@@ -194,4 +183,3 @@ Desarrollo real en los repos personales (`ghp`/`glp`), push a `gla` incremental 
 - No implementar funciones fuera del scope MVP sin discutirlo primero
 - Cada fase se testea completamente en localnet antes de mergear a `main`
 - Al reanudar sesión: leer este archivo + verificar estado actual antes de escribir código
-- Referencia de seguridad del contrato original: `Reference/report.md` sección 7
